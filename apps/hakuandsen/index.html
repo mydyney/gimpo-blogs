@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html class="dark" lang="ko">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    
+    <!-- Multilingual B2B SEO Optimization -->
+    <title>hakuandsen | Autonomous B2B AI Marketing System</title>
+    <meta name="description" content="[KO] hakuandsen은 기업을 위한 맞춤형 B2B AI 마케팅 시스템을 설계하고 구축합니다. 데이터 수집부터 멀티채널 자동 마케팅 실행까지 하나의 통합 인텔리전스로 실현하세요. [JA] hakuandsenは、企業向けのカスタムB2B AIマーケティングシステムを構築します。データ収集から自動マルチチャネルマーケティング実行まで、一つの統合インテリジェンスで実現します。"/>
+    <meta name="keywords" content="AI 마케팅, 마케팅 자동화, B2B AI, SNS 마케팅 자동화, AI 카피라이팅, AI Marketing, Marketing Automation, Enterprise AI"/>
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website"/>
+    <meta property="og:title" content="hakuandsen | Enterprise AI Marketing Architecture"/>
+    <meta property="og:description" content="AI가 자율적으로 실행하는 오프라인/온라인 옴니채널 마케팅 자동화 아키텍처. / AIが自律的に実行するオム니チャネルマーケティング自動化アーキテクチャ。"/>
+    <meta property="og:image" content="https://lh3.googleusercontent.com/aida/ADBb0uhjHCUGzXWlB0pRJI7na1q5dNOFrOOhPGPYNH0scawLEfgx3ag0B6_2MyK71gekly-hSYhCUhJ9pFpEIOcOg-FGVfmZbWOcuCIJ-xumES11OeiKZBqsOwenR_gpdACpBfkg8II3OyxwnSiwNTLtnOCkmSCmIV2_hUZCBEdn2FaG095lQBc-u2SdWhrTplRkLIEvNzGrXp4emYxY3Xy0ux3zEwS6pp-ph1sYbN1AcwHyDvM_Tc31CY3KoFg"/>
+
+    <!-- Google Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- CSS file linking -->
+    <link rel="stylesheet" href="style.css"/>
+
+    <!-- Tailwind Config with dark premium cyberpunk styling -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#004e5c",
+                        "on-tertiary": "#432c00",
+                        "surface-tint": "#ddb7ff",
+                        "on-primary-fixed-variant": "#6900b3",
+                        "inverse-primary": "#842bd2",
+                        "on-surface": "#dce1fb",
+                        "secondary-container": "#03b5d3",
+                        "on-primary": "#490080",
+                        "tertiary-fixed": "#ffdead",
+                        "on-primary-fixed": "#2c0051",
+                        "on-secondary": "#003640",
+                        "background": "#020617",
+                        "surface-container-low": "#151b2d",
+                        "on-primary-container": "#400071",
+                        "secondary-fixed": "#acedff",
+                        "inverse-on-surface": "#2a3043",
+                        "inverse-surface": "#dce1fb",
+                        "primary-fixed": "#f0dbff",
+                        "on-surface-variant": "#cfc2d6",
+                        "on-tertiary-container": "#3a2600",
+                        "primary-fixed-dim": "#ddb7ff",
+                        "on-secondary-fixed": "#001f26",
+                        "primary-container": "#b76dff",
+                        "primary": "#a855f7", /* Neon Purple */
+                        "outline": "#988d9f",
+                        "surface-container-lowest": "#070d1f",
+                        "secondary-fixed-dim": "#06b6d4", /* Electric Cyan */
+                        "surface-bright": "#33394c",
+                        "tertiary": "#fabc4e",
+                        "tertiary-fixed-dim": "#fabc4e",
+                        "on-background": "#dce1fb",
+                        "surface-variant": "#2e3447",
+                        "surface-container": "#191f31",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed-variant": "#604100",
+                        "error-container": "#93000a",
+                        "on-error-container": "#ffdad6",
+                        "surface-dim": "#0c1324",
+                        "secondary": "#06b6d4",
+                        "surface-container-high": "#23293c",
+                        "tertiary-container": "#bd871a",
+                        "on-secondary-container": "#00424e",
+                        "error": "#ffb4ab",
+                        "on-tertiary-fixed": "#281900",
+                        "outline-variant": "#4d4354",
+                        "surface-container-highest": "#2e3447",
+                        "surface": "#0c1324"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "margin-desktop": "64px",
+                        "container-max": "1440px"
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-surface font-body-md overflow-x-hidden relative">
+
+<!-- Tech Grid Backdrop & Glow meshes -->
+<div class="fixed inset-0 grid-bg opacity-[0.08] pointer-events-none z-0"></div>
+<div class="fixed inset-0 mesh-gradient pointer-events-none z-0"></div>
+
+<!-- Header (Sticky Obsidian Glass) -->
+<header class="fixed top-0 w-full z-50 bg-surface/60 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(168,85,247,0.06)]">
+    <nav class="flex justify-between items-center px-margin-mobile md:px-margin-desktop py-4 max-w-container-max mx-auto h-20">
+        
+        <!-- Premium AI Neural Network "H/S" Logo -->
+        <a class="flex items-center gap-3 group cursor-pointer" href="#" id="logo-link">
+            <svg class="w-10 h-10 drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#06b6d4" />
+                        <stop offset="50%" stop-color="#a855f7" />
+                        <stop offset="100%" stop-color="#ec4899" />
+                    </linearGradient>
+                </defs>
+                <!-- Stylized AI interlocking H and S nodes -->
+                <circle cx="25" cy="25" r="5" fill="#06b6d4" />
+                <circle cx="75" cy="25" r="5" fill="#a855f7" />
+                <circle cx="25" cy="75" r="5" fill="#a855f7" />
+                <circle cx="75" cy="75" r="5" fill="#ec4899" />
+                <circle cx="50" cy="50" r="8" fill="url(#logoGrad)" class="animate-pulse" />
+                
+                <!-- Intersecting path structures -->
+                <path d="M25,25 L25,75 M75,25 L75,75 M25,50 L75,50" stroke="url(#logoGrad)" stroke-width="4" stroke-linecap="round"/>
+                <path d="M75,25 Q50,25 25,50 T75,75" stroke="#ffffff" stroke-width="2.5" stroke-dasharray="4 4" opacity="0.7"/>
+            </svg>
+            <span class="font-headline-xl text-2xl font-black tracking-tighter text-white group-hover:text-primary transition-all duration-300">hakuandsen</span>
+        </a>
+
+        <!-- Desktop Navigation Items -->
+        <div class="hidden md:flex items-center gap-8">
+            <a class="font-body-md text-on-surface-variant hover:text-primary transition-all duration-300" href="#service">
+                <span class="lang-ko">솔루션</span><span class="lang-ja">ソリューション</span>
+            </a>
+            <a class="font-body-md text-on-surface-variant hover:text-primary transition-all duration-300" href="#features">
+                <span class="lang-ko">핵심기술</span><span class="lang-ja">コア技術</span>
+            </a>
+            <a class="font-body-md text-on-surface-variant hover:text-primary transition-all duration-300" href="#workflow">
+                <span class="lang-ko">프로세스</span><span class="lang-ja">開発プロセス</span>
+            </a>
+            <a class="font-body-md text-on-surface-variant hover:text-primary transition-all duration-300" href="#contact">
+                <span class="lang-ko">문의하기</span><span class="lang-ja">お問い合わせ</span>
+            </a>
+        </div>
+
+        <!-- Right Action Items (Bilingual toggler + Action CTA) -->
+        <div class="flex items-center gap-4">
+            <!-- Sliding language switcher button -->
+            <button class="glass-card hover:bg-white/5 border border-white/10 px-4 py-2 rounded-full text-xs font-bold transition-all flex items-center gap-2 cursor-pointer shadow-md select-none" id="lang-toggle-btn" aria-label="Toggle language">
+                <span class="lang-opt">KO</span>
+                <span class="opacity-30">|</span>
+                <span class="lang-opt opacity-40">JA</span>
+            </button>
+            <a class="bg-primary hover:bg-primary/95 text-white px-5 py-2.5 rounded-xl font-bold transition-all hover:shadow-[0_0_15px_rgba(168,85,247,0.5)] active:scale-95 text-sm" href="#contact">
+                <span class="lang-ko">무료 진단</span><span class="lang-ja">無料診断</span>
+            </a>
+            
+            <!-- Mobile Menu Trigger -->
+            <button class="md:hidden text-primary focus:outline-none" id="nav-menu-btn" aria-label="Toggle menu">
+                <span class="material-symbols-outlined text-3xl">menu</span>
+            </button>
+        </div>
+    </nav>
+    
+    <!-- Mobile dropdown navigation list -->
+    <div class="hidden md:hidden bg-surface-container/95 border-b border-white/10 w-full" id="mobile-nav-list">
+        <div class="flex flex-col py-4 px-6 space-y-4">
+            <a class="text-on-background hover:text-primary transition-colors" href="#service">
+                <span class="lang-ko">솔루션</span><span class="lang-ja">ソリューション</span>
+            </a>
+            <a class="text-on-background hover:text-primary transition-colors" href="#features">
+                <span class="lang-ko">핵심기술</span><span class="lang-ja">コア技術</span>
+            </a>
+            <a class="text-on-background hover:text-primary transition-colors" href="#workflow">
+                <span class="lang-ko">프로세스</span><span class="lang-ja">開発プロセス</span>
+            </a>
+            <a class="text-on-background hover:text-primary transition-colors" href="#contact">
+                <span class="lang-ko">문의하기</span><span class="lang-ja">お問い合わせ</span>
+            </a>
+            <a class="bg-primary text-white font-bold py-3 rounded-lg text-center block shadow-md" href="#contact">
+                <span class="lang-ko">무료 진단 신청</span><span class="lang-ja">無料診断の申し込み</span>
+            </a>
+        </div>
+    </div>
+</header>
+
+<main class="relative z-10 pt-20">
+    
+    <!-- Hero Section with Autonomous SNS Pipeline Graphic -->
+    <section class="relative min-h-[92vh] flex flex-col justify-center px-margin-mobile md:px-margin-desktop py-12 overflow-hidden" id="hero">
+        <div class="max-w-container-max mx-auto w-full grid lg:grid-cols-12 gap-gutter items-center">
+            
+            <!-- Text Content Column -->
+            <div class="lg:col-span-5 text-left z-10 reveal-item">
+                <span class="inline-block px-4 py-1.5 glass-card rounded-full text-secondary font-bold text-xs uppercase tracking-widest mb-6 border border-secondary/20 shadow-md">
+                    Autonomous Multi-Channel AI Engine
+                </span>
+                
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white mb-8 leading-[1.1] tracking-tight">
+                    <span class="lang-ko">AI가 자율적으로 실행하는 마케팅 자동화</span>
+                    <span class="lang-ja">AIが自律的に実行するマーケティング自動化</span>
+                    <br/>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-secondary to-primary drop-shadow-sm font-black">
+                        <span class="lang-ko">엔터프라이즈 아키텍처</span>
+                        <span class="lang-ja">エンタープライズアーキテクチャ</span>
+                    </span>
+                </h1>
+                
+                <p class="text-body-lg text-on-surface-variant mb-12 leading-relaxed max-w-xl">
+                    <span class="lang-ko">hakuandsen은 기업 데이터를 분석하여 최적의 SNS 및 디지털 채널에 콘텐츠를 자동으로 방송하고 최적화하는 맞춤형 AI 인텔리전스 시스템을 구축합니다.</span>
+                    <span class="lang-ja">hakuandsenは、企業データを分析して最適なSNSやデジタルチャネルにコンテンツを自動でブロードキャストし、最適化するオーダーメイドのAIシステムを構築します。</span>
+                </p>
+                
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a class="bg-primary text-white px-8 py-4 rounded-xl font-bold hover:shadow-[0_0_25px_rgba(168,85,247,0.5)] transition-all flex items-center justify-center gap-2 hover:bg-primary/95 text-lg" href="#contact">
+                        <span class="lang-ko">무료 시스템 진단</span><span class="lang-ja">無料システム診断</span>
+                        <span class="material-symbols-outlined text-lg">arrow_forward</span>
+                    </a>
+                    <a class="glass-card text-white px-8 py-4 rounded-xl font-bold hover:bg-white/10 border border-white/15 transition-all text-center text-lg" href="#service">
+                        <span class="lang-ko">아키텍처 소개</span><span class="lang-ja">アーキテクチャ紹介</span>
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Custom High-Fidelity Animated SVG SNS Distribution Pipeline Column -->
+            <div class="lg:col-span-7 relative w-full h-auto min-h-[380px] sm:min-h-[480px] flex items-center justify-center reveal-item" style="transition-delay: 200ms;">
+                <div class="absolute -inset-4 bg-primary/10 blur-[130px] rounded-full pointer-events-none"></div>
+                
+                <!-- The Core Pipeline SVG Graphic -->
+                <svg class="w-full h-full max-w-[640px] md:max-w-none overflow-visible select-none" viewBox="0 0 800 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    
+                    <!-- Glow Filters for Neon Lights -->
+                    <defs>
+                        <linearGradient id="cyanPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#06b6d4" />
+                            <stop offset="100%" stop-color="#a855f7" />
+                        </linearGradient>
+                        <radialGradient id="aiCoreGlow" cx="50%" cy="50%" r="50%">
+                            <stop offset="0%" stop-color="#a855f7" stop-opacity="0.3"/>
+                            <stop offset="100%" stop-color="#020617" stop-opacity="0"/>
+                        </radialGradient>
+                    </defs>
+
+                    <!-- Orbit Grid Rings -->
+                    <circle cx="400" cy="250" r="170" stroke="rgba(255,255,255,0.03)" stroke-width="1.5" stroke-dasharray="6 8" />
+                    <circle cx="400" cy="250" r="230" stroke="rgba(255,255,255,0.02)" stroke-width="1" />
+
+                    <!-- Ambient Glow Center -->
+                    <circle cx="400" cy="250" r="100" fill="url(#aiCoreGlow)" />
+
+                    <!-- Connection Lines from AI Engine to SNS Nodes -->
+                    <!-- Node 1: Instagram (Top Left) -->
+                    <path d="M400,250 Q280,180 230,110" stroke="rgba(6, 182, 212, 0.15)" stroke-width="2.5" fill="none"/>
+                    <path d="M400,250 Q280,180 230,110" class="laser-line-cyan" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+                    <!-- Node 2: TikTok (Top Right) -->
+                    <path d="M400,250 Q520,180 570,110" stroke="rgba(168, 85, 247, 0.15)" stroke-width="2.5" fill="none"/>
+                    <path d="M400,250 Q520,180 570,110" class="laser-line-purple" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+                    <!-- Node 3: YouTube (Middle Left) -->
+                    <path d="M400,250 Q280,250 160,250" stroke="rgba(6, 182, 212, 0.15)" stroke-width="2.5" fill="none"/>
+                    <path d="M400,250 Q280,250 160,250" class="laser-line-cyan" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+                    <!-- Node 4: Meta / Facebook (Middle Right) -->
+                    <path d="M400,250 Q520,250 640,250" stroke="rgba(168, 85, 247, 0.15)" stroke-width="2.5" fill="none"/>
+                    <path d="M400,250 Q520,250 640,250" class="laser-line-purple" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+                    <!-- Node 5: X / Twitter (Bottom Left) -->
+                    <path d="M400,250 Q280,320 230,390" stroke="rgba(6, 182, 212, 0.15)" stroke-width="2.5" fill="none"/>
+                    <path d="M400,250 Q280,320 230,390" class="laser-line-cyan" stroke="#06b6d4" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+                    <!-- Node 6: LinkedIn (Bottom Right) -->
+                    <path d="M400,250 Q520,320 570,390" stroke="rgba(168, 85, 247, 0.15)" stroke-width="2.5" fill="none"/>
+                    <path d="M400,250 Q520,320 570,390" class="laser-line-purple" stroke="#a855f7" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+
+                    <!-- Node 7: Threads (Top Center) -->
+                    <path d="M400,250 L400,70" stroke="rgba(221, 183, 255, 0.15)" stroke-width="2" fill="none"/>
+                    <path d="M400,250 L400,70" class="laser-line-gradient" stroke="url(#cyanPurple)" stroke-width="2" stroke-linecap="round" fill="none"/>
+
+                    <!-- Central AI Neural Engine Core -->
+                    <g class="core-pulse cursor-pointer">
+                        <circle cx="400" cy="250" r="42" fill="#0c1324" stroke="url(#cyanPurple)" stroke-width="3" />
+                        <circle cx="400" cy="250" r="32" fill="rgba(168, 85, 247, 0.15)" />
+                        <!-- Pulsating interior micro-chip visual -->
+                        <polygon points="400,238 412,250 400,262 388,250" fill="#a855f7" />
+                        <circle cx="400" cy="250" r="4" fill="#06b6d4" />
+                    </g>
+                    <!-- Tech indicators surrounding center -->
+                    <circle cx="400" cy="250" r="54" stroke="rgba(168,85,247,0.4)" stroke-width="1.5" stroke-dasharray="5 15" />
+
+                    <!-- ORBITING SNS NODES (Interactive Groups with CSS Tooltips) -->
+                    <!-- 1. INSTAGRAM NODE -->
+                    <g class="pipeline-node cursor-pointer" transform="translate(0, 0)">
+                        <circle cx="230" cy="110" r="26" fill="#0c1324" stroke="#06b6d4" stroke-width="2" class="neon-glow-card"/>
+                        <!-- Insta SVG Logo -->
+                        <rect x="218" y="98" width="24" height="24" rx="6" stroke="#ffffff" stroke-width="1.8" fill="none"/>
+                        <circle cx="230" cy="110" r="5" stroke="#ffffff" stroke-width="1.8"/>
+                        <circle cx="237" cy="103" r="1.2" fill="#ffffff"/>
+                        
+                        <!-- Floating Glassmorphic Tooltip on Hover -->
+                        <g class="node-tooltip">
+                            <rect x="130" y="32" width="160" height="46" rx="10" fill="rgba(7, 13, 31, 0.9)" stroke="rgba(6, 182, 212, 0.5)" stroke-width="1"/>
+                            <text x="210" y="52" fill="#06b6d4" font-size="11" font-family="Geist" font-weight="bold" text-anchor="middle">INSTAGRAM FEED</text>
+                            <text x="210" y="66" fill="#ffffff" font-size="10" font-family="Geist" text-anchor="middle">
+                                <tspan class="lang-ko">+320% 자동 도달율</tspan><tspan class="lang-ja">+320% 自動リーチ</tspan>
+                            </text>
+                        </g>
+                    </g>
+
+                    <!-- 2. TIKTOK NODE -->
+                    <g class="pipeline-node cursor-pointer">
+                        <circle cx="570" cy="110" r="26" fill="#0c1324" stroke="#a855f7" stroke-width="2" />
+                        <!-- TikTok SVG Logo -->
+                        <path d="M578,103 a 5,5 0 0 1 -4,3 H573 v12 a 4,4 0 1 1 -4,-4 h1 v-3 h-2 a 6,6 0 1 0 7,6 v-9 a 8,8 0 0 0 3,-5" fill="#ffffff" />
+                        
+                        <g class="node-tooltip">
+                            <rect x="510" y="32" width="160" height="46" rx="10" fill="rgba(7, 13, 31, 0.9)" stroke="rgba(168, 85, 247, 0.5)" stroke-width="1"/>
+                            <text x="590" y="52" fill="#a855f7" font-size="11" font-family="Geist" font-weight="bold" text-anchor="middle">TIKTOK CREATIVE</text>
+                            <text x="590" y="66" fill="#ffffff" font-size="10" font-family="Geist" text-anchor="middle">
+                                <tspan class="lang-ko">숏폼 AI 자동생성</tspan><tspan class="lang-ja">短尺AI自動生成</tspan>
+                            </text>
+                        </g>
+                    </g>
+
+                    <!-- 3. YOUTUBE NODE -->
+                    <g class="pipeline-node cursor-pointer">
+                        <circle cx="160" cy="250" r="26" fill="#0c1324" stroke="#06b6d4" stroke-width="2" />
+                        <!-- YouTube SVG Logo -->
+                        <rect x="146" y="240" width="28" height="20" rx="5" fill="#ffffff" />
+                        <polygon points="157,245 167,250 157,255" fill="#0c1324" />
+                        
+                        <g class="node-tooltip">
+                            <rect x="80" y="174" width="160" height="46" rx="10" fill="rgba(7, 13, 31, 0.9)" stroke="rgba(6, 182, 212, 0.5)" stroke-width="1"/>
+                            <text x="160" y="194" fill="#06b6d4" font-size="11" font-family="Geist" font-weight="bold" text-anchor="middle">YOUTUBE AUTOMATION</text>
+                            <text x="160" y="208" fill="#ffffff" font-size="10" font-family="Geist" text-anchor="middle">
+                                <tspan class="lang-ko">비디오 스크립트 빌더</tspan><tspan class="lang-ja">動画スクリプト自動生成</tspan>
+                            </text>
+                        </g>
+                    </g>
+
+                    <!-- 4. META / FACEBOOK NODE -->
+                    <g class="pipeline-node cursor-pointer">
+                        <circle cx="640" cy="250" r="26" fill="#0c1324" stroke="#a855f7" stroke-width="2" />
+                        <!-- Meta SVG Logo -->
+                        <path d="M632,253 c-3.5,-5.5 -8.5,-5.5 -10,0 c-1.5,5.5 2,5.5 5,0 c3.5,-5.5 8.5,-5.5 10,0 c1.5,5.5 -2,5.5 -5,0 z" stroke="#ffffff" stroke-width="2.2" fill="none" />
+                        <path d="M648,253 c3.5,-5.5 8.5,-5.5 10,0 c1.5,5.5 -2,5.5 -5,0 c-3.5,-5.5 -8.5,-5.5 -10,0 c-1.5,5.5 2,5.5 5,0 z" stroke="#ffffff" stroke-width="2.2" fill="none" />
+                        
+                        <g class="node-tooltip">
+                            <rect x="560" y="174" width="160" height="46" rx="10" fill="rgba(7, 13, 31, 0.9)" stroke="rgba(168, 85, 247, 0.5)" stroke-width="1"/>
+                            <text x="640" y="194" fill="#a855f7" font-size="11" font-family="Geist" font-weight="bold" text-anchor="middle">META TARGETING</text>
+                            <text x="640" y="208" fill="#ffffff" font-size="10" font-family="Geist" text-anchor="middle">
+                                <tspan class="lang-ko">초정밀 타겟 오디언스</tspan><tspan class="lang-ja">超精密ターゲティング</tspan>
+                            </text>
+                        </g>
+                    </g>
+
+                    <!-- 5. X / TWITTER NODE -->
+                    <g class="pipeline-node cursor-pointer">
+                        <circle cx="230" cy="390" r="26" fill="#0c1324" stroke="#06b6d4" stroke-width="2" />
+                        <!-- X SVG Logo -->
+                        <path d="M220,378 L227,388 L218,402 H222 L229,391 L236,402 H242 L234,390 L242,378 H238 L232,387 L224,378 Z" fill="#ffffff" />
+                        
+                        <g class="node-tooltip">
+                            <rect x="150" y="312" width="160" height="46" rx="10" fill="rgba(7, 13, 31, 0.9)" stroke="rgba(6, 182, 212, 0.5)" stroke-width="1"/>
+                            <text x="230" y="332" fill="#06b6d4" font-size="11" font-family="Geist" font-weight="bold" text-anchor="middle">X SYNDICATION</text>
+                            <text x="230" y="346" fill="#ffffff" font-size="10" font-family="Geist" text-anchor="middle">
+                                <tspan class="lang-ko">실시간 트렌드 포스팅</tspan><tspan class="lang-ja">リアルタイム投稿</tspan>
+                            </text>
+                        </g>
+                    </g>
+
+                    <!-- 6. LINKEDIN NODE -->
+                    <g class="pipeline-node cursor-pointer">
+                        <circle cx="570" cy="390" r="26" fill="#0c1324" stroke="#a855f7" stroke-width="2" />
+                        <!-- LinkedIn SVG Logo -->
+                        <rect x="558" y="378" width="24" height="24" rx="4" fill="#ffffff" />
+                        <text x="562" y="395" fill="#0c1324" font-family="Geist" font-weight="bold" font-size="15">in</text>
+                        
+                        <g class="node-tooltip">
+                            <rect x="490" y="312" width="160" height="46" rx="10" fill="rgba(7, 13, 31, 0.9)" stroke="rgba(168, 85, 247, 0.5)" stroke-width="1"/>
+                            <text x="570" y="332" fill="#a855f7" font-size="11" font-family="Geist" font-weight="bold" text-anchor="middle">LINKEDIN OUTREACH</text>
+                            <text x="570" y="346" fill="#ffffff" font-size="10" font-family="Geist" text-anchor="middle">
+                                <tspan class="lang-ko">B2B 영업 자동화</tspan><tspan class="lang-ja">B2B営業の自動化</tspan>
+                            </text>
+                        </g>
+                    </g>
+
+                    <!-- 7. THREADS NODE -->
+                    <g class="pipeline-node cursor-pointer">
+                        <circle cx="400" cy="70" r="26" fill="#0c1324" stroke="url(#cyanPurple)" stroke-width="2" />
+                        <!-- Threads SVG Logo -->
+                        <path d="M400,60 c-6,0 -10,4 -10,10 c0,6 4,10 10,10 c4,0 7,-2 9,-5 l-2.2,-2 c-1.5,2 -3.5,3 -6.8,3 c-4.5,0 -7,-3 -7,-7 c0,-4 2.5,-7 7,-7 c3,0 5.5,1.5 6.2,4 l-5,0 v2 h7.5 v-2 c-0.8,-4 -4,-6 -9,-6 z" fill="#ffffff" />
+                        
+                        <g class="node-tooltip">
+                            <rect x="320" y="0" width="160" height="46" rx="10" fill="rgba(7, 13, 31, 0.9)" stroke="url(#cyanPurple)" stroke-width="1"/>
+                            <text x="400" y="20" fill="#a855f7" font-size="11" font-family="Geist" font-weight="bold" text-anchor="middle">THREADS INTEGRATOR</text>
+                            <text x="400" y="34" fill="#ffffff" font-size="10" font-family="Geist" text-anchor="middle">
+                                <tspan class="lang-ko">자연어 소통 엔진</tspan><tspan class="lang-ja">自然言語対話エンジン</tspan>
+                            </text>
+                        </g>
+                    </g>
+
+                </svg>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- Solutions Bento Grid Section (통합 AI 솔루션) -->
+    <section class="py-28 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto" id="service">
+        <div class="text-center mb-20 reveal-item">
+            <span class="text-primary font-bold text-xs uppercase tracking-widest block mb-3">Omnichannel AI System Architecture</span>
+            <h2 class="text-3xl md:text-4xl text-white font-extrabold mb-4">
+                <span class="lang-ko">통합 AI 마케팅 솔루션</span>
+                <span class="lang-ja">統合AIマーケティングソリューション</span>
+            </h2>
+            <div class="h-[3px] w-16 bg-gradient-to-r from-secondary to-primary mx-auto rounded-full"></div>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <!-- Grid 1: Data Ingestion (Spotlight Glass Card) -->
+            <div class="glass-card spotlight-card p-10 rounded-2xl md:col-span-1 hover:neon-rim-purple transition-all duration-500 group reveal-item">
+                <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-8 border border-primary/20 group-hover:bg-primary/25 transition-all">
+                    <span class="material-symbols-outlined text-primary text-3xl">database</span>
+                </div>
+                <h3 class="text-xl text-white font-bold mb-4">
+                    <span class="lang-ko">실시간 데이터 인제스션</span><span class="lang-ja">リアルタイム・インジェスション</span>
+                </h3>
+                <p class="text-body-md text-on-surface-variant leading-relaxed">
+                    <span class="lang-ko">CRM, ERP, 웹사이트 행동 데이터, 소셜 채널의 원시 데이터를 단일 파이프라인으로 연결하여 자율 분석이 가능하도록 포맷을 정제합니다.</span>
+                    <span class="lang-ja">CRM、ERP、WEB行動履歴、SNSチャネルのローデータを単一のパイプラインに統合し、自動解析可能な形式へ最適に変換します。</span>
+                </p>
+            </div>
+            
+            <!-- Grid 2: Cognitive ML Engine -->
+            <div class="glass-card spotlight-card p-10 rounded-2xl md:col-span-2 hover:neon-rim-cyan transition-all duration-500 group reveal-item" style="transition-delay: 150ms;">
+                <div class="flex flex-col lg:flex-row gap-8 items-start relative z-10">
+                    <div class="flex-1">
+                        <div class="w-14 h-14 bg-secondary/10 rounded-xl flex items-center justify-center mb-8 border border-secondary/20 group-hover:bg-secondary/25 transition-all">
+                            <span class="material-symbols-outlined text-secondary text-3xl">psychology</span>
+                        </div>
+                        <h3 class="text-xl text-white font-bold mb-4">
+                            <span class="lang-ko">인지형 ML 의사결정 엔진</span><span class="lang-ja">認知型ML意思決定エンジン</span>
+                        </h3>
+                        <p class="text-body-md text-on-surface-variant leading-relaxed mb-6">
+                            <span class="lang-ko">고객의 잠재적 니즈와 이탈률을 정밀하게 머신러닝 스코어링하여, 어떤 시점에 어떤 메시지를 송출해야 전환율이 가장 높을지 지능적으로 결정합니다.</span>
+                            <span class="lang-ja">顧客の潜在ニーズや離脱率を機械学習で精密にスコアリング。どのタイミングでどのクリエイティブを発信すべきか、AIが自律的に最適判断します。</span>
+                        </p>
+                    </div>
+                    <div class="flex-1 w-full h-48 bg-background/50 rounded-xl overflow-hidden border border-white/5 relative flex items-center justify-center">
+                        <div class="absolute inset-0 bg-gradient-to-br from-secondary/15 to-primary/10"></div>
+                        <span class="material-symbols-outlined text-6xl text-secondary animate-pulse opacity-40">hub</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Grid 3: Content Automation -->
+            <div class="glass-card spotlight-card p-10 rounded-2xl md:col-span-2 hover:neon-rim-purple transition-all duration-500 group reveal-item" style="transition-delay: 300ms;">
+                <div class="flex flex-col lg:flex-row-reverse gap-8 items-start relative z-10">
+                    <div class="flex-1">
+                        <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-8 border border-primary/20 group-hover:bg-primary/25 transition-all">
+                            <span class="material-symbols-outlined text-primary text-3xl">person_search</span>
+                        </div>
+                        <h3 class="text-xl text-white font-bold mb-4">
+                            <span class="lang-ko">개인화 크리에이티브 빌더</span><span class="lang-ja">パーソナライズ自動クリエイティブ</span>
+                        </h3>
+                        <p class="text-body-md text-on-surface-variant leading-relaxed mb-6">
+                            <span class="lang-ko">브랜드 가이드를 준수하는 맞춤형 광고 카피, SNS 피드 이미지, 이메일 본문을 생성형 AI가 실시간으로 어조를 조율하여 자동으로 생산합니다.</span>
+                            <span class="lang-ja">ブランドトーンを完璧に学習した広告文面、SNS画像、メルマガ本文を生成AIがリアルタイムで自動作成。配信トーンも完全に個別制御します。</span>
+                        </p>
+                    </div>
+                    <div class="flex-1 w-full h-48 bg-background/50 rounded-xl border border-white/5 relative flex flex-col justify-center p-6 space-y-4 font-mono text-[10px] text-on-surface-variant">
+                        <div class="h-2 w-3/4 bg-white/5 rounded"></div>
+                        <div class="h-2 w-1/2 bg-white/10 rounded"></div>
+                        <div class="h-2 w-2/3 bg-primary/20 rounded-md"></div>
+                        <div class="h-2 w-1/3 bg-white/5 rounded"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Grid 4: Omnichannel Broadcasting -->
+            <div class="glass-card spotlight-card p-10 rounded-2xl md:col-span-1 hover:neon-rim-cyan transition-all duration-500 group reveal-item" style="transition-delay: 450ms;">
+                <div class="w-14 h-14 bg-secondary/10 rounded-xl flex items-center justify-center mb-8 border border-secondary/20 group-hover:bg-secondary/25 transition-all">
+                    <span class="material-symbols-outlined text-secondary text-3xl">campaign</span>
+                </div>
+                <h3 class="text-xl text-white font-bold mb-4">
+                    <span class="lang-ko">옴니채널 자동 브로드캐스트</span><span class="lang-ja">マルチチャネル自動ブロードキャスト</span>
+                </h3>
+                <p class="text-body-md text-on-surface-variant leading-relaxed">
+                    <span class="lang-ko">통합 AI 마케팅 허브가 Instagram, TikTok, Threads, YouTube, Meta 광고 계정에 API를 통해 제작된 캠페인을 실시간 자동 게시합니다.</span>
+                    <span class="lang-ja">統合AIエンジンがInstagram、TikTok、Threads、YouTube、Meta広告へAPIを通じて、クリエイティブキャンペーンを一斉自動配信します。</span>
+                </p>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- System Architecture Timeline Process (아키텍처 ∙ 워크플로우) -->
+    <section class="py-28 bg-surface-container-lowest relative overflow-hidden" id="workflow">
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-px h-full bg-gradient-to-b from-primary/0 via-primary/50 to-secondary/0 hidden md:block"></div>
+        
+        <div class="max-w-4xl mx-auto px-margin-mobile relative z-10">
+            <div class="text-center mb-20 reveal-item">
+                <span class="text-primary font-bold text-xs uppercase tracking-widest block mb-3">System Architecture Pipeline</span>
+                <h2 class="text-3xl md:text-4xl text-white font-extrabold mb-4">
+                    <span class="lang-ko">아키텍처 프로세스</span>
+                    <span class="lang-ja">アーキテクチャ・ワークフロー</span>
+                </h2>
+                <p class="text-body-md text-on-surface-variant max-w-md mx-auto">
+                    <span class="lang-ko">기업의 로우데이터가 마케팅 실적과 고객 전환율로 진화하는 3단계 파이프라인</span>
+                    <span class="lang-ja">企業のローデータがコンバージョン価値へと変わる3段階パイプライン</span>
+                </p>
+            </div>
+            
+            <div class="space-y-24">
+                <!-- Step 1: INGEST -->
+                <div class="flex flex-col md:flex-row items-center gap-12 group reveal-item">
+                    <div class="flex-1 text-right hidden md:block">
+                        <h4 class="text-secondary font-bold text-2xl mb-2">01. INGEST</h4>
+                        <p class="text-sm text-on-surface-variant">
+                            <span class="lang-ko">CRM 및 오프라인 API 통합 데이터 허브 연결</span>
+                            <span class="lang-ja">CRM及びオムニチャネルAPI統合データ統合</span>
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full glass-card border-secondary/50 flex items-center justify-center relative z-20 group-hover:scale-125 transition-transform duration-500 bg-background shadow-[0_0_20px_rgba(6,182,212,0.4)] text-secondary font-bold text-lg">
+                        1
+                    </div>
+                    <div class="flex-1 text-left">
+                        <div class="md:hidden text-secondary font-bold text-sm mb-2 uppercase tracking-widest">01. INGEST</div>
+                        <h3 class="text-xl text-white font-bold mb-4">
+                            <span class="lang-ko">실시간 통합 데이터 인제스션</span>
+                            <span class="lang-ja">リアルタイム統合データ収集</span>
+                        </h3>
+                        <div class="p-6 glass-card rounded-xl">
+                            <p class="text-sm text-on-surface-variant leading-relaxed">
+                                <span class="lang-ko">모든 ERP, 메일 솔루션, 자사 커머스 웹로그 및 소셜 API를 연결하여 마케팅 데이터 파이프라인으로 전송하고 중복 정보를 필터링합니다.</span>
+                                <span class="lang-ja">あらゆるERP、ECモールログ、顧客管理システム、SNSのAPIを一つのセ큐アなパイプラインに集約し、不要な重複データを排除します。</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 2: ANALYZE -->
+                <div class="flex flex-col md:flex-row-reverse items-center gap-12 group reveal-item" style="transition-delay: 150ms;">
+                    <div class="flex-1 text-left hidden md:block">
+                        <h4 class="text-primary font-bold text-2xl mb-2">02. ANALYZE</h4>
+                        <p class="text-sm text-on-surface-variant">
+                            <span class="lang-ko">자율 의사결정 엔진에 의한 마케팅 우선순위 분석</span>
+                            <span class="lang-ja">自律型AIエンジンによる意思決定と解析</span>
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full glass-card border-primary/50 flex items-center justify-center relative z-20 group-hover:scale-125 transition-transform duration-500 bg-background shadow-[0_0_20px_rgba(168,85,247,0.4)] text-primary font-bold text-lg">
+                        2
+                    </div>
+                    <div class="flex-1 text-right">
+                        <div class="md:hidden text-primary font-bold text-sm mb-2 uppercase tracking-widest">02. ANALYZE</div>
+                        <h3 class="text-xl text-white font-bold mb-4">
+                            <span class="lang-ko">코그니티브 프로세싱</span>
+                            <span class="lang-ja">コグニティブ・プロセッシング</span>
+                        </h3>
+                        <div class="p-6 glass-card rounded-xl">
+                            <p class="text-sm text-on-surface-variant leading-relaxed">
+                                <span class="lang-ko">수집된 유저 행동 패턴을 딥러닝 분석하여 이탈 가능성을 사전 예방하고, 고객 생애 가치(LTV)를 높이기 위한 타겟 마케팅 로직을 기획합니다.</span>
+                                <span class="lang-ja">蓄積された顧客行動パターンをディープラーニング解析し、離脱リスクのスコア化や、LTV最大化のためのパーソナライズ施策を考案します。</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 3: ACTIVATE -->
+                <div class="flex flex-col md:flex-row items-center gap-12 group reveal-item" style="transition-delay: 300ms;">
+                    <div class="flex-1 text-right hidden md:block">
+                        <h4 class="text-secondary font-bold text-2xl mb-2">03. ACTIVATE</h4>
+                        <p class="text-sm text-on-surface-variant">
+                            <span class="lang-ko">멀티채널 자동 피드 배포 및 크리에이티브 발송</span>
+                            <span class="lang-ja">マルチチャネル自動配信及びクリエイティブ実行</span>
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full glass-card border-secondary/50 flex items-center justify-center relative z-20 group-hover:scale-125 transition-transform duration-500 bg-background shadow-[0_0_20px_rgba(6,182,212,0.4)] text-secondary font-bold text-lg">
+                        3
+                    </div>
+                    <div class="flex-1 text-left">
+                        <div class="md:hidden text-secondary font-bold text-sm mb-2 uppercase tracking-widest">03. ACTIVATE</div>
+                        <h3 class="text-xl text-white font-bold mb-4">
+                            <span class="lang-ko">옴니채널 자동 배포</span>
+                            <span class="lang-ja">ダイナミック・アクティベーション</span>
+                        </h3>
+                        <div class="p-6 glass-card rounded-xl">
+                            <p class="text-sm text-on-surface-variant leading-relaxed">
+                                <span class="lang-ko">결정된 마케팅 캠페인을 바탕으로 생성형 AI가 실시간 소재를 제작하고, API를 통해 다양한 SNS 플랫폼에 즉시 동시 포스팅을 실행합니다.</span>
+                                <span class="lang-ja">生成AIが作成したバナーやコピー文面を、API連携を通じてInstagram、TikTok、YouTubeへ自律的に同期配信・投稿を行います。</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- Inquiry Multilingual Form Section (문의하기) -->
+    <section class="py-28 px-margin-mobile md:px-margin-desktop" id="contact">
+        <div class="max-w-5xl mx-auto glass-card rounded-3xl overflow-hidden flex flex-col md:flex-row neon-rim-purple reveal-item">
+            
+            <div class="flex-1 p-12 bg-gradient-to-br from-primary/10 to-transparent flex flex-col justify-between">
+                <div>
+                    <h2 class="text-3xl md:text-4xl text-white font-extrabold mb-6 leading-tight">
+                        <span class="lang-ko">차세대 AI 마케팅,<br/>지금 바로 선점하세요.</span>
+                        <span class="lang-ja">次世代AIマーケティング、<br/>今すぐ実現へ。</span>
+                    </h2>
+                    <p class="text-body-md text-on-surface-variant mb-8 leading-relaxed">
+                        <span class="lang-ko">hakuandsen의 마케팅 AI 시스템 전문가가 귀사의 데이터 파이프라인 현황을 진단하고, 맞춤형 인프라 설계 방향을 제시해 드립니다.</span>
+                        <span class="lang-ja">hakuandsenの専門アーキテクトが貴社のデータ環境とチャネル構成を徹底診断し、最適な自動化イン프ラロードマップをご提案します。</span>
+                    </p>
+                </div>
+                
+                <div class="space-y-5">
+                    <div class="flex items-center gap-4 text-sm text-white font-medium">
+                        <span class="material-symbols-outlined text-primary">verified</span>
+                        <span><span class="lang-ko">맞춤형 컨설팅 및 시스템 설계안 제공</span><span class="lang-ja">無料システム設計プラン提案</span></span>
+                    </div>
+                    <div class="flex items-center gap-4 text-sm text-white font-medium">
+                        <span class="material-symbols-outlined text-primary">speed</span>
+                        <span><span class="lang-ko">시스템 구축 및 통합까지 최단 4주 소요</span><span class="lang-ja">開発から実装まで最短4週間</span></span>
+                    </div>
+                    <div class="flex items-center gap-4 text-sm text-white font-medium">
+                        <span class="material-symbols-outlined text-primary">security</span>
+                        <span><span class="lang-ko">안전한 데이터 격리 및 온프레미스급 보안</span><span class="lang-ja">エンタープライズ級セキュア設計</span></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex-1 p-12 relative">
+                <!-- Web3Forms Integration -->
+                <form action="https://api.web3forms.com/submit" method="POST" class="space-y-6" id="contact-form">
+                    <!-- Web3Forms Config tokens -->
+                    <input type="hidden" name="access_key" value="7a3c706d-e490-4bf6-9a25-e87f8ad2524a"/>
+                    <input type="hidden" name="subject" value="【hakuandsen】B2B AI 마케팅 구축 문의 접수"/>
+                    <input type="hidden" name="from_name" value="hakuandsen AI Portal"/>
+                    <input type="checkbox" name="botcheck" class="hidden" style="display: none;"/>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2.5">Company Name</label>
+                        <input name="company" required class="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3.5 focus:border-secondary transition-all outline-none text-white text-sm" placeholder="주식회사 〇〇 / 株式会社 〇〇" type="text"/>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2.5">Your Name</label>
+                            <input name="name" required class="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3.5 focus:border-secondary transition-all outline-none text-white text-sm" placeholder="홍길동 / 氏名" type="text"/>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2.5">Email</label>
+                            <input name="email" required class="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3.5 focus:border-secondary transition-all outline-none text-white text-sm" placeholder="example@hakuandsen.com" type="email"/>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2.5">Inquiry Details</label>
+                        <textarea name="message" required class="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-3.5 focus:border-secondary transition-all outline-none text-white text-sm" placeholder="귀사의 업종, 연계하고자 하는 SNS 플랫폼 또는 AI 자동화 목적을 입력해 주세요." rows="4"></textarea>
+                    </div>
+                    
+                    <button class="w-full bg-primary text-white py-4.5 rounded-xl font-bold hover:shadow-[0_0_20px_rgba(168,85,247,0.5)] transition-all text-base flex items-center justify-center" type="submit" id="form-submit-btn">
+                        <span class="btn-text-ko lang-ko">문의 전송하기</span>
+                        <span class="btn-text-ja lang-ja font-bold">送信する</span>
+                        
+                        <svg class="btn-spinner hidden animate-spin ml-2.5 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+            
+        </div>
+    </section>
+</main>
+
+<!-- Footer -->
+<footer class="relative z-10 w-full py-14 bg-background border-t border-white/5">
+    <div class="flex flex-col md:flex-row justify-between items-center px-margin-mobile md:px-margin-desktop gap-gutter max-w-container-max mx-auto">
+        
+        <div class="flex flex-col items-center md:items-start gap-3">
+            <div class="flex items-center gap-2.5">
+                <svg class="w-7 h-7" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="25" cy="25" r="5" fill="#06b6d4" />
+                    <circle cx="75" cy="25" r="5" fill="#a855f7" />
+                    <circle cx="25" cy="75" r="5" fill="#a855f7" />
+                    <circle cx="75" cy="75" r="5" fill="#ec4899" />
+                    <path d="M25,25 L25,75 M75,25 L75,75 M25,50 L75,50" stroke="#a855f7" stroke-width="4"/>
+                </svg>
+                <span class="font-headline-xl text-xl font-extrabold tracking-tighter text-white">hakuandsen</span>
+            </div>
+            <p class="text-xs text-on-surface-variant font-medium">© 2026 hakuandsen. All rights reserved.</p>
+        </div>
+        
+        <div class="flex flex-wrap justify-center gap-8 text-xs text-on-surface-variant">
+            <a class="hover:text-secondary transition-colors" href="#">Privacy Policy</a>
+            <a class="hover:text-secondary transition-colors" href="#">Terms of Service</a>
+            <a class="hover:text-secondary transition-colors" href="#">System Status</a>
+        </div>
+    </div>
+</footer>
+
+<!-- Futuristic Neon Success Modal -->
+<div class="fixed inset-0 z-50 flex items-center justify-center hidden" id="success-modal">
+    <!-- Frosted overlay backdrop -->
+    <div class="modal-overlay absolute inset-0 bg-black/90 opacity-0 transition-opacity duration-300"></div>
+    
+    <!-- Modal container -->
+    <div class="modal-content glass-card p-10 md:p-12 rounded-3xl max-w-lg w-[90%] text-center relative z-10 neon-rim-cyan transform scale-95 opacity-0 transition-all duration-300">
+        
+        <!-- Glowing dynamic check icon -->
+        <div class="w-20 h-20 bg-secondary/10 rounded-full flex items-center justify-center mx-auto mb-8 border-2 border-secondary/40 shadow-[0_0_20px_rgba(6,182,212,0.25)]">
+            <svg class="w-10 h-10 text-secondary" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"></path>
+            </svg>
+        </div>
+        
+        <h3 class="text-2xl text-white font-extrabold mb-4">
+            <span class="lang-ko">문의 접수가 완료되었습니다</span>
+            <span class="lang-ja">お問い合わせが完了しました</span>
+        </h3>
+        
+        <p class="text-body-md text-on-surface-variant mb-10 leading-relaxed">
+            <span class="lang-ko">hakuandsen의 시스템 아키텍트가 검토 후, 신속히 안내해 드리겠습니다. (보통 24시간 이내 연락)</span>
+            <span class="lang-ja">hakuandsenのシステム専門担当者が確認の上、通常24時間以内にご連絡いたします。</span>
+        </p>
+        
+        <button class="bg-secondary text-white font-bold px-10 py-3.5 rounded-xl hover:opacity-90 active:scale-95 transition-all text-sm w-full sm:w-auto shadow-md" id="modal-close-btn">
+            <span class="lang-ko">닫기</span><span class="lang-ja">閉じる</span>
+        </button>
+    </div>
+</div>
+
+<!-- Main bilingual portal script -->
+<script src="main.js"></script>
+</body>
+</html>

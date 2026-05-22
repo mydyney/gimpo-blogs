@@ -1,0 +1,180 @@
+/* hakuandsen Cyber-Premium Dark Mode Stylesheet */
+
+body {
+    font-family: 'Geist', 'Sora', sans-serif;
+    scroll-behavior: smooth;
+}
+
+/* Multi-language Toggling Rules (CSS-based instant switcher) */
+html[lang="ko"] .lang-ja { display: none !important; }
+html[lang="ja"] .lang-ko { display: none !important; }
+
+/* Frosted Obsidian Glass Cards */
+.glass-card {
+    background: rgba(12, 19, 36, 0.65);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.neon-rim-purple {
+    box-shadow: 0 0 30px rgba(168, 85, 247, 0.12), inset 0 0 10px rgba(168, 85, 247, 0.08);
+    border-color: rgba(168, 85, 247, 0.25);
+}
+
+.neon-rim-cyan {
+    box-shadow: 0 0 30px rgba(6, 182, 212, 0.12), inset 0 0 10px rgba(6, 182, 212, 0.08);
+    border-color: rgba(6, 182, 212, 0.25);
+}
+
+/* Background Grids & Ambient Meshes */
+.grid-bg {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+.mesh-gradient {
+    background: radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.15) 0%, transparent 45%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.15) 0%, transparent 45%);
+}
+
+/* Interactive SVG SNS Pipeline Keyframes */
+.laser-line-cyan {
+    stroke-dasharray: 8, 12;
+    animation: flowLaser 1.5s linear infinite;
+    filter: drop-shadow(0 0 6px rgba(6, 182, 212, 0.8));
+}
+
+.laser-line-purple {
+    stroke-dasharray: 8, 12;
+    animation: flowLaser 1.5s linear infinite;
+    filter: drop-shadow(0 0 6px rgba(168, 85, 247, 0.8));
+}
+
+.laser-line-gradient {
+    stroke-dasharray: 8, 12;
+    animation: flowLaser 1.5s linear infinite;
+    filter: drop-shadow(0 0 6px rgba(221, 183, 255, 0.8));
+}
+
+@keyframes flowLaser {
+    to {
+        stroke-dashoffset: -40;
+    }
+}
+
+.core-pulse {
+    animation: corePulseAnimation 3s ease-in-out infinite;
+}
+
+@keyframes corePulseAnimation {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.8;
+    }
+    50% {
+        transform: scale(1.15);
+        opacity: 1;
+        filter: drop-shadow(0 0 20px rgba(168, 85, 247, 0.9));
+    }
+}
+
+/* Orbit Path Rotation */
+.orbit-rotator {
+    transform-origin: 400px 250px;
+    animation: rotateOrbit 60s linear infinite;
+}
+
+@keyframes rotateOrbit {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Interactive Node Hover effects */
+.pipeline-node {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.pipeline-node:hover {
+    transform: scale(1.15);
+}
+
+.pipeline-node .node-tooltip {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px) scale(0.95);
+    transform-origin: bottom center;
+    transition: opacity 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.pipeline-node:hover .node-tooltip {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* Dynamic Cards spotlight hover effect */
+.spotlight-card {
+    position: relative;
+    overflow: hidden;
+}
+
+.spotlight-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(800px circle at var(--mouse-x, 0) var(--mouse-y, 0), rgba(255, 255, 255, 0.05), transparent 40%);
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.spotlight-card:hover::before {
+    opacity: 1;
+}
+
+/* Scroll-driven Reveal System */
+.reveal-item {
+    opacity: 0;
+    transform: translateY(35px);
+    transition: opacity 0.85s cubic-bezier(0.25, 1, 0.5, 1), transform 0.85s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.reveal-item.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Futuristic neon success modal */
+.modal-overlay {
+    backdrop-filter: blur(12px);
+    transition: opacity 0.4s ease;
+}
+
+.modal-content {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+}
+
+/* Premium Scrollbar */
+::-webkit-scrollbar {
+    width: 10px;
+}
+::-webkit-scrollbar-track {
+    background: #020617;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(168, 85, 247, 0.25);
+    border-radius: 5px;
+    border: 2px solid #020617;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(6, 182, 212, 0.5);
+}

@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html class="dark" lang="ja">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    
+    <!-- SEO Optimization -->
+    <title>gogohaku | Amazon広告運用最適化・ROAS最大化コンサルティング</title>
+    <meta name="description" content="データ駆動型AIアルゴリズムと専任の広告コンサルタントが、貴社のAmazon PPC運用を劇的に改善。ROAS最大化、無駄な広告費の削減、在庫連動型自動制御を完全にサポートします。"/>
+    <meta name="keywords" content="Amazon広告, Amazon PPC, ROAS改善, 売上最大化, 在庫連動型広告, 広告最適化, 広告運用コンサルティング"/>
+    
+    <!-- Open Graph (Facebook/LinkedIn) -->
+    <meta property="og:type" content="website"/>
+    <meta property="og:title" content="gogohaku | Amazon広告運用最適化コンサルティング"/>
+    <meta property="og:description" content="Amazon PPC運用を劇的に改善。ROAS最大化と無駄な広告費の削減を専任コンサルタントが実現します。"/>
+    <meta property="og:image" content="https://lh3.googleusercontent.com/aida-public/AB6AXuCUfqtIglOG0KEd0GNc-ob0flmfpzTToJFjOjnqoPveyxguAQKGy7LGfOle35W80m8f_ZWnS7Cr_nqv9DTqrLt-xB1cAMHwTFG-HOBKkM5K9MdWsljobqvSHKzsjUa_xOTM_X2owpnPQ9Jr9CEpJunikn-OZtUvmWARMX_vxF1vUlCaCNIJhfL8H-g2-yRVK2YLHnY6Augzu8DaEbxzm367-5lzykxxsbuCatvgSFxJ-hEhtvD7qlt0wZF3nZ98Iqfd1QJksulh0yI"/>
+    <meta property="og:locale" content="ja_JP"/>
+
+    <!-- Google Fonts & Material Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    
+    <!-- Custom CSS System -->
+    <link rel="stylesheet" href="style.css"/>
+
+    <!-- Tailwind CSS (via CDN) with tailored config -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "on-background": "#e5e2e1",
+                "primary": "#f2ca50",
+                "secondary-fixed-dim": "#fbbc00",
+                "on-tertiary-fixed": "#1c1b1b",
+                "primary-container": "#d4af37",
+                "on-tertiary-fixed-variant": "#474746",
+                "surface-container": "#201f1f",
+                "surface-tint": "#e9c349",
+                "surface-container-low": "#1c1b1b",
+                "surface-bright": "#393939",
+                "surface-container-high": "#2a2a2a",
+                "tertiary": "#d0cdcd",
+                "surface-dim": "#131313",
+                "on-error": "#690005",
+                "on-tertiary": "#313030",
+                "surface-container-lowest": "#0e0e0e",
+                "secondary-container": "#ffbf00",
+                "error-container": "#93000a",
+                "surface-variant": "#353534",
+                "on-primary-fixed": "#241a00",
+                "on-primary-fixed-variant": "#574500",
+                "outline": "#99907c",
+                "on-primary": "#3c2f00",
+                "inverse-primary": "#735c00",
+                "on-primary-container": "#554300",
+                "primary-fixed": "#ffe088",
+                "on-error-container": "#ffdad6",
+                "on-secondary-fixed": "#261a00",
+                "on-secondary": "#402d00",
+                "on-tertiary-container": "#454544",
+                "on-surface": "#e5e2e1",
+                "secondary-fixed": "#ffdfa0",
+                "outline-variant": "#4d4635",
+                "error": "#ffb4ab",
+                "tertiary-fixed": "#e5e2e1",
+                "background": "#131313",
+                "inverse-surface": "#e5e2e1",
+                "surface": "#131313",
+                "on-secondary-fixed-variant": "#5c4300",
+                "on-secondary-container": "#6d5000",
+                "surface-container-highest": "#353534",
+                "tertiary-fixed-dim": "#c8c6c5",
+                "tertiary-container": "#b4b2b2",
+                "secondary": "#ffe2ab",
+                "on-surface-variant": "#d0c5af",
+                "primary-fixed-dim": "#e9c349",
+                "inverse-on-surface": "#313030"
+            },
+            "spacing": {
+                "margin-desktop": "64px",
+                "margin-mobile": "16px",
+                "gutter": "24px",
+                "base": "8px",
+                "container-max": "1200px"
+            }
+          }
+        }
+      }
+    </script>
+</head>
+<body class="bg-background text-on-background selection:bg-primary selection:text-on-primary">
+
+<!-- Header (Sticky Frosted Nav) -->
+<nav class="bg-surface/80 backdrop-blur-md border-b border-white/10 w-full fixed top-0 left-0 right-0 z-50 transition-all duration-300" id="main-nav">
+    <div class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto h-20">
+        <!-- Abstract Interlocking Geometric Logo -->
+        <a class="flex items-center group cursor-pointer" href="#" id="logo-link">
+            <svg class="w-9 h-9 mr-3 drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#FFE59E" />
+                        <stop offset="50%" stop-color="#D4AF37" />
+                        <stop offset="100%" stop-color="#997315" />
+                    </linearGradient>
+                </defs>
+                <path d="M45,25 C30,25 20,35 20,50 C20,65 30,75 45,75 C58,75 65,67 65,55 L65,50 L45,50" stroke="url(#goldGrad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M55,25 L55,75 M75,25 L75,75 M55,45 L75,45" stroke="url(#goldGrad)" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="text-headline-md font-bold tracking-tight text-white group-hover:text-primary transition-colors duration-300">gogohaku</span>
+        </a>
+
+        <!-- Desktop Navigation Items -->
+        <div class="hidden md:flex items-center gap-8">
+            <a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-300" href="#features" id="nav-item-features">特徴</a>
+            <a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-300" href="#results" id="nav-item-results">実績</a>
+            <a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-300" href="#workflow" id="nav-item-workflow">導入の流れ</a>
+            <a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-300" href="#contact" id="nav-item-contact">お問い合わせ</a>
+            <a class="bg-primary text-on-primary font-bold px-6 py-2.5 rounded-full hover:opacity-90 active:scale-95 transition-all shadow-lg shadow-primary/10 border border-primary/20" href="#contact" id="nav-btn-cta">無料相談</a>
+        </div>
+
+        <!-- Mobile Burger Menu Trigger -->
+        <button class="md:hidden text-primary focus:outline-none" id="nav-menu-btn" aria-label="Toggle menu">
+            <span class="material-symbols-outlined text-3xl">menu</span>
+        </button>
+    </div>
+    
+    <!-- Mobile dropdown navigation list -->
+    <div class="hidden md:hidden bg-surface-container/95 border-b border-white/10 w-full" id="mobile-nav-list">
+        <div class="flex flex-col py-4 px-6 space-y-4">
+            <a class="text-on-background hover:text-primary transition-colors" href="#features">特徴</a>
+            <a class="text-on-background hover:text-primary transition-colors" href="#results">実績</a>
+            <a class="text-on-background hover:text-primary transition-colors" href="#workflow">導入の流れ</a>
+            <a class="text-on-background hover:text-primary transition-colors" href="#contact">お問い合わせ</a>
+            <a class="bg-primary text-on-primary font-bold py-3 rounded text-center block shadow-md" href="#contact">無料相談を申し込む</a>
+        </div>
+    </div>
+</nav>
+
+<main class="pt-20">
+    <!-- Hero Section -->
+    <section class="relative min-h-[90vh] flex items-center hero-gradient overflow-hidden px-margin-mobile md:px-margin-desktop py-12" id="hero">
+        <div class="max-w-container-max mx-auto w-full grid md:grid-cols-2 gap-gutter items-center">
+            
+            <div class="z-10 reveal-item">
+                <div class="inline-block px-4 py-1.5 border border-primary/30 rounded-full mb-6 bg-primary/5">
+                    <span class="text-primary font-bold text-xs tracking-widest uppercase">Premium Amazon Ad Consulting</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl text-white font-extrabold mb-8 leading-tight tracking-tight">
+                    Amazon広告運用を<br class="hidden sm:inline"/>
+                    <span class="text-primary relative inline-block">
+                        最適化
+                        <span class="absolute left-0 bottom-1 w-full h-[6px] bg-primary/20 -z-10"></span>
+                    </span>
+                    し、売上を最大化する
+                </h1>
+                <p class="text-body-lg text-on-surface-variant mb-12 max-w-lg leading-relaxed">
+                    データ駆動型の精密な戦略と、独自の在庫連動広告アルゴリズムで、あなたのAmazonビジネスを次のステージへ。ROASの最大化と持続的な利益成長を実現します。
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <a class="bg-primary text-on-primary font-bold px-10 py-4 rounded-full text-center hover:opacity-90 transition-all gold-glow shadow-lg shadow-primary/20 text-lg" href="#contact" id="hero-cta-btn">
+                        無料で相談する
+                    </a>
+                    <a class="border border-outline text-on-background font-bold px-10 py-4 rounded-full text-center hover:bg-white/5 transition-all text-lg" href="#features" id="hero-secondary-btn">
+                        選ばれる理由
+                    </a>
+                </div>
+            </div>
+            
+            <!-- Hero Animated Metric Visual -->
+            <div class="relative hidden md:block reveal-item" style="transition-delay: 200ms;">
+                <div class="absolute -inset-10 bg-primary/20 blur-[120px] rounded-full"></div>
+                <div class="glass-card p-8 rounded-2xl relative overflow-hidden group min-h-[420px] flex flex-col gold-glow">
+                    
+                    <div class="flex justify-between items-start mb-8 border-b border-white/5 pb-6">
+                        <div>
+                            <h4 class="text-white text-lg font-bold mb-1">ROAS Growth Analysis</h4>
+                            <p class="text-xs text-on-surface-variant uppercase tracking-wider">Performance Metrics • Real-time Optimizer</p>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-primary text-3xl font-extrabold tracking-tight">+150.4%</span>
+                            <p class="text-xs text-on-surface-variant">Avg. Improvement</p>
+                        </div>
+                    </div>
+                    
+                    <div class="relative flex-1 w-full min-h-[220px]">
+                        <!-- SVG Chart -->
+                        <svg class="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 600 220">
+                            <!-- Grid Lines -->
+                            <line stroke="rgba(255,255,255,0.04)" stroke-width="1.5" x1="0" x2="600" y1="44" y2="44"></line>
+                            <line stroke="rgba(255,255,255,0.04)" stroke-width="1.5" x1="0" x2="600" y1="88" y2="88"></line>
+                            <line stroke="rgba(255,255,255,0.04)" stroke-width="1.5" x1="0" x2="600" y1="132" y2="132"></line>
+                            <line stroke="rgba(255,255,255,0.04)" stroke-width="1.5" x1="0" x2="600" y1="176" y2="176"></line>
+                            
+                            <!-- Area Gradient -->
+                            <defs>
+                                <linearGradient id="chartGradient" x1="0%" x2="0%" y1="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#d4af37" stop-opacity="0.25"></stop>
+                                    <stop offset="100%" stop-color="#d4af37" stop-opacity="0"></stop>
+                                </linearGradient>
+                            </defs>
+                            
+                            <!-- Area Fill -->
+                            <path class="opacity-30" d="M0,200 L50,170 L100,190 L150,140 L200,160 L250,100 L300,120 L350,70 L400,90 L450,30 L500,50 L550,15 L600,28 L600,220 L0,220 Z" fill="url(#chartGradient)"></path>
+                            
+                            <!-- The Main Line -->
+                            <path class="chart-path" d="M0,200 L50,170 L100,190 L150,140 L200,160 L250,100 L300,120 L350,70 L400,90 L450,30 L500,50 L550,15 L600,28" fill="none" stroke="#f2ca50" stroke-linecap="round" stroke-linejoin="round" stroke-width="4.5"></path>
+                            
+                            <!-- Pulsating Markers at key points -->
+                            <circle cx="250" cy="100" fill="#f2ca50" r="5">
+                                <animate attributeName="r" dur="2s" repeatCount="indefinite" values="5;9;5"></animate>
+                                <animate attributeName="opacity" dur="2s" repeatCount="indefinite" values="1;0.4;1"></animate>
+                            </circle>
+                            <circle cx="450" cy="30" fill="#f2ca50" r="5">
+                                <animate attributeName="r" dur="2.5s" repeatCount="indefinite" values="5;9;5"></animate>
+                                <animate attributeName="opacity" dur="2.5s" repeatCount="indefinite" values="1;0.4;1"></animate>
+                            </circle>
+                            <circle cx="600" cy="28" fill="#f2ca50" r="6"></circle>
+                            <circle class="pulse-marker" cx="600" cy="28" fill="none" r="5" stroke="#f2ca50" stroke-width="2.5"></circle>
+                        </svg>
+                        
+                        <!-- Floating Glassmorphic Tooltips -->
+                        <div class="tooltip-float absolute top-[8%] right-[10%] bg-surface-bright/95 backdrop-blur border border-primary/30 px-4 py-2 rounded-xl shadow-2xl z-20">
+                            <div class="flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-primary animate-pulse"></span>
+                                <span class="text-xs font-bold text-white tracking-wide">Target ROAS: 850%</span>
+                            </div>
+                        </div>
+                        <div class="tooltip-float absolute bottom-[35%] left-[18%] bg-surface-bright/95 backdrop-blur border border-white/10 px-3.5 py-2 rounded-lg shadow-xl z-20" style="animation-delay: -1.5s;">
+                            <span class="text-xs text-on-surface-variant font-medium">Automatic optimization active</span>
+                        </div>
+                    </div>
+                    
+                    <!-- X-Axis Labels -->
+                    <div class="flex justify-between mt-6 pt-4 border-t border-white/5 text-[10px] text-on-surface-variant font-bold tracking-widest uppercase">
+                        <span>Phase 1</span>
+                        <span>Phase 2</span>
+                        <span>Phase 3</span>
+                        <span>Optimization</span>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </section>
+
+    <!-- Bento Grid Features (選ばれる理由) -->
+    <section class="py-28 px-margin-mobile md:px-margin-desktop bg-surface-container-lowest" id="features">
+        <div class="max-w-container-max mx-auto">
+            <div class="text-center mb-20 reveal-item">
+                <span class="text-primary font-bold text-sm tracking-widest uppercase block mb-3">Our Core Expertise</span>
+                <h2 class="text-3xl md:text-4xl text-white font-extrabold mb-4">選ばれる理由</h2>
+                <div class="w-16 h-[3px] bg-primary mx-auto rounded-full"></div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Feature 1: CPC Optimization -->
+                <div class="glass-card p-10 rounded-2xl hover:translate-y-[-6px] transition-all duration-500 flex flex-col justify-between reveal-item group hover:border-primary/20">
+                    <div>
+                        <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-8 border border-primary/20 group-hover:bg-primary/25 transition-all">
+                            <span class="material-symbols-outlined text-primary text-3xl">trending_up</span>
+                        </div>
+                        <h3 class="text-xl text-white font-bold mb-4">精密なCPC・入札最適化</h3>
+                        <p class="text-body-md text-on-surface-variant leading-relaxed">
+                            競合分析と機械学習を活用したスマート入札管理システム。無駄なインプレッションを自動で排除し、広告費の浪費を防ぎ、ROIを最大化します。
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Feature 2: Inventory-Linked Ads (Spans 2 rows on desktop for asymmetric feel) -->
+                <div class="glass-card p-10 rounded-2xl border-primary/20 relative overflow-hidden md:row-span-2 reveal-item group" style="transition-delay: 150ms;">
+                    <div class="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity pointer-events-none">
+                        <span class="material-symbols-outlined text-[150px]">inventory_2</span>
+                    </div>
+                    <div class="relative z-10 h-full flex flex-col justify-between">
+                        <div>
+                            <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-8 border border-primary/20 group-hover:bg-primary/25 transition-all">
+                                <span class="material-symbols-outlined text-primary text-3xl">sync</span>
+                            </div>
+                            <h3 class="text-xl text-white font-bold mb-4">在庫連動型自動広告制御</h3>
+                            <p class="text-body-md text-on-surface-variant mb-8 leading-relaxed">
+                                在庫数を自動でリアルタイムに検知し、広告配信量・価格設定を自動調整。欠品による広告費の無駄使いを完全回避し、過剰在庫の早期解消を促します。
+                            </p>
+                        </div>
+                        <div class="rounded-xl overflow-hidden border border-white/10 aspect-video relative">
+                            <div class="absolute inset-0 bg-gradient-to-t from-background to-transparent z-10"></div>
+                            <img alt="Automated logistics warehouse" class="w-full h-full object-cover grayscale opacity-70 group-hover:scale-105 group-hover:grayscale-0 transition-all duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCUfqtIglOG0KEd0GNc-ob0flmfpzTToJFjOjnqoPveyxguAQKGy7LGfOle35W80m8f_ZWnS7Cr_nqv9DTqrLt-xB1cAMHwTFG-HOBKkM5K9MdWsljobqvSHKzsjUa_xOTM_X2owpnPQ9Jr9CEpJunikn-OZtUvmWARMX_vxF1vUlCaCNIJhfL8H-g2-yRVK2YLHnY6Augzu8DaEbxzm367-5lzykxxsbuCatvgSFxJ-hEhtvD7qlt0wZF3nZ98Iqfd1QJksulh0yI"/>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Feature 3: Detail Page SEO -->
+                <div class="glass-card p-10 rounded-2xl hover:translate-y-[-6px] transition-all duration-500 reveal-item group hover:border-primary/20" style="transition-delay: 300ms;">
+                    <div class="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-8 border border-primary/20 group-hover:bg-primary/25 transition-all">
+                        <span class="material-symbols-outlined text-primary text-3xl">edit_note</span>
+                    </div>
+                    <h3 class="text-xl text-white font-bold mb-4">転換率を最大化する商品ページ改善</h3>
+                    <p class="text-body-md text-on-surface-variant leading-relaxed">
+                        データに基づいた高精度なSEOテキスト設計と商品クリエイティブ最適化。ユニットセッション率（購入転換率）を最大化し、広告クリックの価値を極限まで高めます。
+                    </p>
+                </div>
+                
+                <!-- Additional Context Card (Gold gradient background) -->
+                <div class="bg-gradient-to-br from-primary/10 to-transparent p-10 rounded-2xl border border-primary/20 flex flex-col justify-center reveal-item" style="transition-delay: 450ms;">
+                    <span class="text-primary font-bold text-xs uppercase tracking-widest block mb-2">Our Mission</span>
+                    <p class="text-2xl text-white font-bold leading-tight">
+                        すべてのセラーに、<br/>
+                        圧倒的な費用対効果と<br/>
+                        最高品質の運用を。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Results Section (実績紹介) -->
+    <section class="py-28 px-margin-mobile md:px-margin-desktop bg-background" id="results">
+        <div class="max-w-container-max mx-auto">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16 gap-6 reveal-item">
+                <div class="max-w-2xl">
+                    <span class="text-primary font-bold text-sm tracking-widest uppercase block mb-3">Proven Success Cases</span>
+                    <h2 class="text-3xl md:text-4xl text-white font-extrabold mb-4">実績紹介</h2>
+                    <p class="text-body-lg text-on-surface-variant">
+                        gogohakuの導入により、多くのブランドが圧倒的な成長と収益改善を達成しています。
+                    </p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-gutter">
+                <!-- Case 1 -->
+                <div class="glass-card rounded-2xl overflow-hidden border-l-4 border-l-primary flex flex-col md:flex-row reveal-item group hover:border-r hover:border-r-white/10 transition-all duration-300">
+                    <div class="w-full md:w-2/5 h-48 md:h-auto overflow-hidden">
+                        <img alt="Food and Beverage Products" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1eMEYx4mBXyasFtXY7fJ-WU_kxeMmqsb4x5he5chrIazmhFl7uBAHQ4oLQdSe_b2eyMcCXYGlTJ4xZ4ZQs-XbJ25NykAdu_nZqAOAbZvOg5sBYX7oG12lvOnQln0jVqxe8xVDpXAXRcOv-tUBIQdk4VgPle5hPc2PanA0NUwvwN2Q3OShdsAeUP15wQSRlZ8fxSkqUapFRbVrzFjAdknDTnAGlDORmS1r1ndt8IQY3k5gEHeTqCaNWeKEUOgbDabY6FlKQzIA4nM"/>
+                    </div>
+                    <div class="p-8 flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-2 text-primary mb-4">
+                                <span class="material-symbols-outlined text-sm">stars</span>
+                                <span class="text-xs font-bold tracking-widest uppercase">Food &amp; Beverage Brand</span>
+                            </div>
+                            <h3 class="text-2xl text-white font-bold mb-6">導入3ヶ月でROAS 200%向上、売上1.5倍に</h3>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 border-t border-white/5 pt-6">
+                            <div>
+                                <p class="text-xs text-on-surface-variant mb-1">月間売上</p>
+                                <p class="text-2xl font-extrabold text-primary">+150%</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-on-surface-variant mb-1">ACOS (売上対広告費比)</p>
+                                <p class="text-2xl font-extrabold text-primary">-40%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Case 2 -->
+                <div class="glass-card rounded-2xl overflow-hidden border-l-4 border-l-primary flex flex-col md:flex-row reveal-item group hover:border-r hover:border-r-white/10 transition-all duration-300" style="transition-delay: 200ms;">
+                    <div class="w-full md:w-2/5 h-48 md:h-auto overflow-hidden">
+                        <img alt="Electronic Devices" class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSC8cfkQ94q_7-m3tOSQIT5ITnS-rfTEgrjvJKzpP0FVtj2y2YgEjXBXlZHfojdd7rhDACpy3c_juKx6aeY_NhMl4C2dClFZ7jonqSDECHQufDTbYGJPp4XQgJtm8_K8kL2WYtCtkMnkvVep6fdp37i2Jbw1uVsS41s5mU1OfCeM8QkzN0gq2MDork09puIDLyxSxL22IHTV6-U8L0ewh7FKC2TaQqcwEGTsIYXjf-Wgehea1G1Utsq0VsgJcGXYjcM4l3Cdw2MWs"/>
+                    </div>
+                    <div class="p-8 flex-1 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-2 text-primary mb-4">
+                                <span class="material-symbols-outlined text-sm">stars</span>
+                                <span class="text-xs font-bold tracking-widest uppercase">Electronics Brand</span>
+                            </div>
+                            <h3 class="text-2xl text-white font-bold mb-6">広告経由の月間注文数が2,000件増加</h3>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4 border-t border-white/5 pt-6">
+                            <div>
+                                <p class="text-xs text-on-surface-variant mb-1">注文増加率</p>
+                                <p class="text-2xl font-extrabold text-primary">+320%</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-on-surface-variant mb-1">CVR (購入転換率)</p>
+                                <p class="text-2xl font-extrabold text-primary">+12%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Work Flow Section (導入の流れ) -->
+    <section class="py-28 px-margin-mobile md:px-margin-desktop bg-surface-container-lowest" id="workflow">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-20 reveal-item">
+                <span class="text-primary font-bold text-sm tracking-widest uppercase block mb-3">Onboarding Roadmap</span>
+                <h2 class="text-3xl md:text-4xl text-white font-extrabold mb-4">導入の流れ</h2>
+                <div class="w-16 h-[3px] bg-primary mx-auto rounded-full"></div>
+            </div>
+            
+            <div class="space-y-12 relative before:absolute before:inset-0 before:left-6 md:before:left-1/2 before:w-[2px] before:bg-white/5 before:-z-10">
+                <!-- Step 1 -->
+                <div class="flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-0 relative z-10 reveal-item">
+                    <div class="w-full md:w-[45%] md:text-right">
+                        <span class="text-primary font-bold text-sm uppercase tracking-widest block mb-2">Step 01</span>
+                        <h4 class="text-lg text-white font-bold mb-3">アカウント状況の無料診断</h4>
+                        <p class="text-sm text-on-surface-variant md:max-w-sm ml-auto">
+                            現在の広告アカウントデータ、インプレッションシェア、無駄クリックの発生状況をプロが徹底解析し、課題と改善ポテンシャルを可視化します。
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-[#1e1e1e] border-2 border-primary text-primary font-bold flex items-center justify-center md:mx-auto shadow-[0_0_15px_rgba(212,175,55,0.3)]">1</div>
+                    <div class="hidden md:block w-[45%]"></div>
+                </div>
+                
+                <!-- Step 2 -->
+                <div class="flex flex-col md:flex-row-reverse items-start md:items-center gap-8 md:gap-0 relative z-10 reveal-item" style="transition-delay: 150ms;">
+                    <div class="w-full md:w-[45%] text-left">
+                        <span class="text-primary font-bold text-sm uppercase tracking-widest block mb-2">Step 02</span>
+                        <h4 class="text-lg text-white font-bold mb-3">最適化戦略とシミュレーションの提示</h4>
+                        <p class="text-sm text-on-surface-variant md:max-w-sm">
+                            無料診断を元に、目標達成（ROAS改善・売上最大化）に向けた具体的な入札最適化ロジック、予算配分、商品ページ改善案をご提示します。
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-[#1e1e1e] border-2 border-primary text-primary font-bold flex items-center justify-center md:mx-auto shadow-[0_0_15px_rgba(212,175,55,0.3)]">2</div>
+                    <div class="hidden md:block w-[45%]"></div>
+                </div>
+                
+                <!-- Step 3 -->
+                <div class="flex flex-col md:flex-row items-start md:items-center gap-8 md:gap-0 relative z-10 reveal-item" style="transition-delay: 300ms;">
+                    <div class="w-full md:w-[45%] md:text-right">
+                        <span class="text-primary font-bold text-sm uppercase tracking-widest block mb-2">Step 03</span>
+                        <h4 class="text-lg text-white font-bold mb-3">最適化設定の開始・運用監視</h4>
+                        <p class="text-sm text-on-surface-variant md:max-w-sm ml-auto">
+                            ご契約後、アルゴリズムの適用と商品ページの最適化を実行。専任コンサルタントが毎日パフォーマンスを監視・チューニングします。
+                        </p>
+                    </div>
+                    <div class="w-12 h-12 rounded-full bg-[#1e1e1e] border-2 border-primary text-primary font-bold flex items-center justify-center md:mx-auto shadow-[0_0_15px_rgba(212,175,55,0.3)]">3</div>
+                    <div class="hidden md:block w-[45%]"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Inquiry / Contact Section (お問い合わせ) -->
+    <section class="py-32 px-margin-mobile md:px-margin-desktop bg-background" id="contact">
+        <div class="max-w-3xl mx-auto">
+            <div class="text-center mb-16 reveal-item">
+                <span class="text-primary font-bold text-sm tracking-widest uppercase block mb-3">Contact Us</span>
+                <h2 class="text-3xl md:text-4xl text-white font-extrabold mb-6">無料相談・お問い合わせ</h2>
+                <p class="text-body-md text-on-surface-variant max-w-xl mx-auto leading-relaxed">
+                    現在のAmazon広告運用における課題や達成したい目標をお聞かせください。通常24時間以内に専門コンサルタントがご連絡いたします。
+                </p>
+            </div>
+            
+            <!-- Web3Forms Form Integration -->
+            <form action="https://api.web3forms.com/submit" method="POST" class="glass-card p-8 md:p-12 rounded-2xl gold-glow space-y-8 reveal-item" id="contact-form">
+                
+                <!-- Web3Forms Config -->
+                <input type="hidden" name="access_key" value="7a3c706d-e490-4bf6-9a25-e87f8ad2524a"/>
+                <input type="hidden" name="subject" value="【gogohaku】新しい無料相談のお問い合わせ"/>
+                <input type="hidden" name="from_name" value="gogohaku Inquiry System"/>
+                <!-- Honeypot for spam protection -->
+                <input type="checkbox" name="botcheck" class="hidden" style="display: none;"/>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <label class="block text-xs font-bold text-on-surface-variant mb-2.5 uppercase tracking-wide">会社名</label>
+                        <input name="company" required class="w-full bg-surface-dim border border-outline-variant focus:border-primary focus:ring-0 text-white px-4 py-3 rounded-lg transition-all outline-none" placeholder="株式会社〇〇" type="text" id="form-company"/>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-on-surface-variant mb-2.5 uppercase tracking-wide">お名前</label>
+                        <input name="name" required class="w-full bg-surface-dim border border-outline-variant focus:border-primary focus:ring-0 text-white px-4 py-3 rounded-lg transition-all outline-none" placeholder="山田 太郎" type="text" id="form-name"/>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-on-surface-variant mb-2.5 uppercase tracking-wide">メールアドレス</label>
+                    <input name="email" required class="w-full bg-surface-dim border border-outline-variant focus:border-primary focus:ring-0 text-white px-4 py-3 rounded-lg transition-all outline-none" placeholder="example@email.com" type="email" id="form-email"/>
+                </div>
+                
+                <div>
+                    <label class="block text-xs font-bold text-on-surface-variant mb-2.5 uppercase tracking-wide">お問い合わせ内容</label>
+                    <textarea name="message" required class="w-full bg-surface-dim border border-outline-variant focus:border-primary focus:ring-0 text-white px-4 py-3 rounded-lg transition-all outline-none" placeholder="現在のアカウント状況、課題、ROASの目標などをご記入ください" rows="5" id="form-message"></textarea>
+                </div>
+                
+                <button class="w-full bg-primary text-on-primary text-lg py-5 rounded-xl hover:opacity-90 active:scale-95 transition-all font-bold tracking-widest shadow-lg shadow-primary/10 flex items-center justify-center" type="submit" id="form-submit-btn">
+                    <span class="btn-text">無料で相談する</span>
+                    <svg class="btn-spinner hidden animate-spin ml-2 h-5 w-5 text-on-primary" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+                
+                <p class="text-center text-xs text-on-surface-variant tracking-wide">
+                    ※お預かりした個人情報は厳重に管理し、お問合わせへの回答にのみ使用いたします。
+                </p>
+            </form>
+        </div>
+    </section>
+</main>
+
+<!-- Footer -->
+<footer class="bg-surface-container-lowest border-t border-white/5 relative z-10">
+    <div class="flex flex-col md:flex-row justify-between items-center w-full px-margin-mobile md:px-margin-desktop py-12 max-w-container-max mx-auto">
+        <div class="mb-8 md:mb-0 flex flex-col items-center md:items-start">
+            <div class="flex items-center mb-2">
+                <svg class="w-6 h-6 mr-2.5" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M45,25 C30,25 20,35 20,50 C20,65 30,75 45,75 C58,75 65,67 65,55 L65,50 L45,50" stroke="#f2ca50" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M55,25 L55,75 M75,25 L75,75 M55,45 L75,45" stroke="#f2ca50" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span class="text-xl font-bold tracking-tight text-white">gogohaku</span>
+            </div>
+            <p class="text-xs text-on-surface-variant">© 2026 gogohaku. All rights reserved.</p>
+        </div>
+        <div class="flex gap-8">
+            <a class="text-on-surface-variant text-xs hover:text-primary transition-colors duration-200" href="#">利用規約</a>
+            <a class="text-on-surface-variant text-xs hover:text-primary transition-colors duration-200" href="#">プライバシーポリシー</a>
+            <a class="text-on-surface-variant text-xs hover:text-primary transition-colors duration-200" href="#">会社概要</a>
+        </div>
+    </div>
+</footer>
+
+<!-- Premium Success Modal (Injected hidden by default) -->
+<div class="fixed inset-0 z-50 flex items-center justify-center hidden" id="success-modal">
+    <!-- Modal Backdrop Overlay -->
+    <div class="modal-overlay absolute inset-0 bg-black/80 opacity-0 transition-opacity duration-300"></div>
+    
+    <!-- Modal Box Content -->
+    <div class="modal-content glass-card p-10 md:p-12 rounded-3xl max-w-lg w-[90%] text-center relative z-10 gold-glow transform scale-95 opacity-0 transition-all duration-300">
+        <!-- Circular Animated Checkmark SVG with Gold Gradient -->
+        <div class="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8 border-2 border-primary/40 shadow-[0_0_20px_rgba(212,175,55,0.25)]">
+            <svg class="w-10 h-10 text-primary" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"></path>
+            </svg>
+        </div>
+        
+        <h3 class="text-2xl text-white font-extrabold mb-4">お問い合わせが完了しました</h3>
+        <p class="text-body-md text-on-surface-variant mb-10 leading-relaxed">
+            お問い合わせいただき、誠にありがとうございます。<br/>
+            内容を確認の上、通常24時間以内に専門コンサルタントよりメールにてご連絡いたします。
+        </p>
+        
+        <button class="bg-primary text-on-primary font-bold px-10 py-3.5 rounded-full hover:opacity-90 active:scale-95 transition-all text-base gold-glow w-full sm:w-auto shadow-md" id="modal-close-btn">
+            閉じる
+        </button>
+    </div>
+</div>
+
+<!-- Main Script System -->
+<script src="main.js"></script>
+</body>
+</html>

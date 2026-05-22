@@ -1,0 +1,107 @@
+/* gogohaku Custom Stylesheet */
+
+body {
+    font-family: 'Noto Sans', 'Noto Sans JP', sans-serif;
+    scroll-behavior: smooth;
+}
+
+/* Glassmorphism Design Tokens */
+.glass-card {
+    background: rgba(26, 26, 26, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.gold-glow {
+    box-shadow: 0 0 25px rgba(212, 175, 55, 0.15), inset 0 0 10px rgba(212, 175, 55, 0.1);
+    border-color: rgba(212, 175, 55, 0.3);
+}
+
+.hero-gradient {
+    background: radial-gradient(circle at 50% 50%, rgba(212, 175, 55, 0.04) 0%, rgba(19, 19, 19, 1) 80%);
+}
+
+/* Animated SVG ROAS Chart CSS */
+.chart-path {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    animation: drawChart 3.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    filter: drop-shadow(0 0 10px rgba(242, 202, 80, 0.5));
+}
+
+@keyframes drawChart {
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+.pulse-marker {
+    animation: pulseGlow 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes pulseGlow {
+    0% {
+        r: 4px;
+        opacity: 1;
+        stroke-width: 1px;
+    }
+    50% {
+        opacity: 0.8;
+    }
+    100% {
+        r: 12px;
+        opacity: 0;
+        stroke-width: 3px;
+    }
+}
+
+.tooltip-float {
+    animation: floatTooltip 4s ease-in-out infinite;
+}
+
+@keyframes floatTooltip {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+    }
+    50% {
+        transform: translateY(-8px) scale(1.02);
+    }
+}
+
+/* Scroll Animation Transitions */
+.reveal-item {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.reveal-item.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Modal CSS transitions */
+.modal-overlay {
+    backdrop-filter: blur(8px);
+    transition: opacity 0.4s ease;
+}
+
+.modal-content {
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+}
+
+/* Custom Gold Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #131313;
+}
+::-webkit-scrollbar-thumb {
+    background: rgba(212, 175, 55, 0.3);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: rgba(212, 175, 55, 0.6);
+}
