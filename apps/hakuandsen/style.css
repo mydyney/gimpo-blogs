@@ -1,13 +1,9 @@
-/* hakuandsen Cyber-Premium Dark Mode Stylesheet */
+/* AgenticSocial Japan Cyber-Premium Dark Mode Stylesheet */
 
 body {
     font-family: 'Geist', 'Sora', sans-serif;
     scroll-behavior: smooth;
 }
-
-/* Multi-language Toggling Rules (CSS-based instant switcher) */
-html[lang="ko"] .lang-ja { display: none !important; }
-html[lang="ja"] .lang-ko { display: none !important; }
 
 /* Frosted Obsidian Glass Cards */
 .glass-card {
