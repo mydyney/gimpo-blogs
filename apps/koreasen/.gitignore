@@ -1,0 +1,5 @@
+# Cloudflare Wrangler build/cache output
+.wrangler/
+
+# Deps (none currently, but keep out if added)
+node_modules/

@@ -5,6 +5,7 @@
   const D = window.MTM_DATA;
   const S = window.MTM_STORE;
   const store = S.store;
+  const IS_ADMIN_HOST = location.hostname === 'admin.mytokyomate.com' || location.hostname === 'admin.localhost';
 
   // Ephemeral UI state (not persisted — mirrors the prototype's non-saved state)
   const ui = {
@@ -27,8 +28,9 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
-  function ph(i, label) {
-    return '<div class="ph ph-' + (i % 3) + '">' + esc(label) + '</div>';
+  function spotPhoto(id, label, eager) {
+    return '<img class="place-photo" src="/images/spots/' + esc(id) + '.jpg" alt="' + esc(label) + '"' +
+      ' loading="' + (eager ? 'eager' : 'lazy') + '" decoding="async">';
   }
 
   // ===== Router =====
@@ -47,6 +49,7 @@
 
   function currentRoute() {
     const p = path();
+    if (IS_ADMIN_HOST) return { name: 'admin' };
     if (p === '/') return { name: 'home' };
     if (p === '/plan') return { name: 'planner' };
     if (p === '/plan/info') return { name: 'info' };
@@ -62,6 +65,7 @@
 
   // Route guards — return a redirect path or null
   function guard(route) {
+    if (route.name === 'admin' && !IS_ADMIN_HOST) return '/';
     if (route.name === 'info' && ui.sel.length === 0) return '/plan';
     if (route.name === 'pay') {
       if (ui.sel.length === 0) return '/plan';
@@ -86,6 +90,18 @@
   }
 
   function renderHeader(route) {
+    if (IS_ADMIN_HOST) {
+      headerEl.innerHTML =
+        '<div class="container bar">' +
+        '<a class="logo" href="/">' +
+        '<span class="logo-main">mytokyomate</span>' +
+        '<span class="logo-sub">ADMIN CONSOLE</span>' +
+        '</a>' +
+        '<span class="admin-host-badge">관리자 전용</span>' +
+        '</div>';
+      return;
+    }
+
     const user = store.user;
     const myNotifs = user ? store.notifications.filter((n) => n.email === user.email) : [];
     const unread = myNotifs.filter((n) => !n.read).length;
@@ -131,6 +147,12 @@
   }
 
   function renderFooter() {
+    if (IS_ADMIN_HOST) {
+      footerEl.hidden = true;
+      footerEl.innerHTML = '';
+      return;
+    }
+    footerEl.hidden = false;
     footerEl.innerHTML =
       '<div class="inner">' +
       '<div>' +
@@ -138,9 +160,9 @@
       '<div class="ft-sub">Tokyomate가 추천하는 일본 여행 가이드 · mytokyomate.com</div>' +
       '</div>' +
       '<div class="ft-links">' +
+      '<a href="/attribution.html" target="_blank" rel="noopener">사진·지도 출처</a>' +
       '<a href="https://blog.naver.com/tokyomate">네이버 블로그</a>' +
       '<a href="https://tripmate.news/">tripmate.news</a>' +
-      (D.SHOW_ADMIN_LINK ? '<button class="admin-link-btn" data-act="go-admin">관리자 화면</button>' : '') +
       '</div>' +
       '</div>';
   }
@@ -179,7 +201,7 @@
       '<span class="hero-note">커피 한잔으로 만드는 일본 여행 계획</span>' +
       '</div>' +
       '</div>' +
-      '<div class="hero-img">' + ph(0, 'TOKYO') + '</div>' +
+      '<div class="hero-img">' + spotPhoto('shibuya', '도쿄 시부야 스크램블 교차로', true) + '</div>' +
       '</section>' +
 
       '<section class="steps-band"><div class="steps">' +
@@ -196,7 +218,7 @@
       '<div class="hl-grid">' +
       highlights.map((s, i) =>
         '<div class="hl-card">' +
-        '<div class="hl-img">' + ph(i, s.ko + ' 사진') + '</div>' +
+        '<div class="hl-img">' + spotPhoto(s.id, s.ko + ' 대표 사진') + '</div>' +
         '<button class="hl-body" data-act="go-plan-tokyo">' +
         '<span class="hl-name">' + esc(s.ko) + '</span>' +
         '<span class="hl-cat">' + esc(s.cat) + '</span>' +
@@ -231,28 +253,21 @@
   }
 
   const JP_MAP_SVG =
-    '<svg viewBox="0 0 280 340">' +
-    '<g fill="#ffffff" stroke="#c3d3da" stroke-width="1.5" stroke-linejoin="round">' +
-    '<path d="M205 55 L215 25 L245 18 L264 42 L250 70 L226 78 L206 68 Z"></path>' +
-    '<path d="M232 92 L248 108 L246 138 L232 168 L210 192 L182 208 L150 220 L118 232 L92 244 L72 252 L64 242 L86 228 L112 216 L144 203 L174 190 L196 170 L214 146 L222 116 Z"></path>' +
-    '<path d="M148 250 L178 243 L188 255 L168 264 L146 259 Z"></path>' +
-    '<path d="M92 258 L114 253 L122 272 L114 296 L94 302 L82 282 Z"></path>' +
-    '<circle cx="44" cy="322" r="4"></circle>' +
-    '<circle cx="34" cy="330" r="3"></circle>' +
-    '</g>' +
-    '</svg>';
+    '<img src="/images/japan-regions.svg" alt="홋카이도부터 오키나와까지 실제 지형 비율을 반영한 일본 지도">';
 
   function viewPlanner() {
     const activeRegion = D.REGIONS.find((r) => r.id === ui.region) || D.REGIONS[0];
 
-    const markers = D.REGIONS.map((r) => {
-      const active = ui.region === r.id;
-      const cnt = ui.sel.filter((x) => x.regionId === r.id).length;
-      const pos = D.MAP_POS[r.id] || [50, 50];
+    const markers = D.MAP_MARKERS.map((marker) => {
+      const active = ui.region === marker.regionId;
+      const cnt = ui.sel.filter((x) => x.regionId === marker.regionId).length;
+      const pos = marker.pos;
+      const labelOffset = marker.labelOffset || [12, 0];
       return (
-        '<button class="map-marker' + (active ? ' active' : '') + (cnt > 0 ? ' picked' : '') + '"' +
-        ' style="left:' + pos[0] + '%;top:' + pos[1] + '%" data-act="pick-region" data-region="' + r.id + '">' +
-        '<span class="dot"></span><span class="lbl">' + esc(r.ko) + '</span>' +
+        '<button class="map-marker ' + marker.kind + (active ? ' active' : '') + (cnt > 0 ? ' picked' : '') + '"' +
+        ' style="left:' + pos[0] + '%;top:' + pos[1] + '%;--label-x:' + labelOffset[0] + 'px;--label-y:' + labelOffset[1] + 'px"' +
+        ' data-act="pick-region" data-region="' + marker.regionId + '" aria-label="' + esc(marker.label) + ' 지역 선택">' +
+        '<span class="dot"></span><span class="lbl">' + esc(marker.label) + '</span>' +
         '</button>'
       );
     }).join('');
@@ -276,7 +291,7 @@
       return (
         '<div class="spot-card' + (selected ? ' selected' : '') + '">' +
         (selected ? '<span class="sp-order">' + (idx + 1) + '</span>' : '') +
-        '<div class="sp-img">' + ph(i, sp.en) + '</div>' +
+        '<div class="sp-img">' + spotPhoto(sp.id, sp.ko + ' 대표 사진') + '</div>' +
         '<button class="sp-body" title="눌러서 선택 · 해제" data-act="toggle-spot" data-spot="' + sp.id + '">' +
         '<span class="sp-name">' + esc(sp.ko) + '</span>' +
         '<span class="sp-cat">' + esc(sp.cat) + '</span>' +
@@ -694,7 +709,6 @@
         ui.notifOpen = false;
         navigate('/');
         break;
-      case 'go-admin': navigate('/admin'); break;
       case 'go-my': navigate('/my'); break;
       case 'go-plan-tokyo': ui.region = 'tokyo'; navigate('/plan'); break;
       case 'go-plan-region': ui.region = el.getAttribute('data-region'); navigate('/plan'); break;

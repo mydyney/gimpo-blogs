@@ -3,7 +3,7 @@
   'use strict';
 
   const REGIONS = [
-    { id: 'tokyo', ko: '도쿄', en: 'TOKYO', desc: '골목 단위까지 상세 안내 가능한 중심 지역', main: true, note: '메이트의 홈그라운드 — 가장 상세한 안내가 가능해요' },
+    { id: 'tokyo', ko: '도쿄', en: 'TOKYO', desc: '골목 단위까지 상세 안내 가능한 중심 지역', main: true, note: '도쿄메이트의 홈그라운드 — 가장 상세한 안내가 가능해요' },
     { id: 'kanto', ko: '도쿄 근교', en: 'AROUND TOKYO', desc: '요코하마 · 가마쿠라 · 하코네 · 닛코', note: '도쿄에서 당일치기로 다녀올 수 있어요' },
     { id: 'kansai', ko: '간사이', en: 'KANSAI', desc: '오사카 · 교토 · 나라', note: '도쿄와 신칸센으로 연결되는 대표 서브 지역' },
     { id: 'kyushu', ko: '규슈', en: 'KYUSHU', desc: '후쿠오카 · 유후인 · 벳푸', note: '온천과 미식의 남쪽 지역' },
@@ -23,7 +23,7 @@
       { id: 'skytree', ko: '도쿄 스카이트리', en: 'SKYTREE', cat: '전망 · 랜드마크' },
       { id: 'tsukiji', ko: '쓰키지 장외시장', en: 'TSUKIJI', cat: '시장 · 미식' },
       { id: 'kichijoji', ko: '기치조지 · 이노카시라', en: 'KICHIJOJI', cat: '공원 · 산책' },
-      { id: 'disney', ko: '도쿄 디즈니 리조트', en: 'DISNEY RESORT', cat: '테마파크' },
+      { id: 'tokyodome', ko: '도쿄돔 시티', en: 'TOKYO DOME CITY', cat: '테마파크 · 도심' },
       { id: 'roppongi', ko: '롯폰기 · 도쿄타워', en: 'ROPPONGI', cat: '야경 · 미술관' },
     ],
     kanto: [
@@ -60,15 +60,19 @@
     ],
   };
 
-  // Marker anchor positions on the Japan silhouette SVG, in % of the 280x340 box
-  const MAP_POS = {
-    tokyo: [80, 44],
-    kanto: [68, 54],
-    kansai: [58, 63],
-    kyushu: [36, 82],
-    hokkaido: [82, 14],
-    okinawa: [15, 95],
-  };
+  // Geographic anchors on the cropped 250 550 2000 2550 Japan map viewBox, in %.
+  // Kanto destinations are intentionally separate because their real-world positions
+  // are close together; label offsets keep the exact dots readable.
+  const MAP_MARKERS = [
+    { id: 'tokyo', regionId: 'tokyo', label: '도쿄', pos: [69.0, 65.1], kind: 'place', labelOffset: [12, -17] },
+    { id: 'yokohama', regionId: 'kanto', label: '요코하마', pos: [68.1, 66.1], kind: 'place', labelOffset: [12, -3] },
+    { id: 'kamakura', regionId: 'kanto', label: '가마쿠라', pos: [67.1, 67.1], kind: 'place', labelOffset: [12, 12] },
+    { id: 'hakone', regionId: 'kanto', label: '하코네', pos: [63.7, 67.3], kind: 'place', labelOffset: [-53, 2] },
+    { id: 'kansai', regionId: 'kansai', label: '간사이', pos: [42.0, 76.0], kind: 'region', labelOffset: [12, 0] },
+    { id: 'kyushu', regionId: 'kyushu', label: '규슈', pos: [13.0, 88.0], kind: 'region', labelOffset: [12, 0] },
+    { id: 'hokkaido', regionId: 'hokkaido', label: '홋카이도', pos: [71.0, 16.0], kind: 'region', labelOffset: [12, 0] },
+    { id: 'okinawa', regionId: 'okinawa', label: '오키나와', pos: [90.0, 90.0], kind: 'region', labelOffset: [-20, -22] },
+  ];
 
   const PAY_METHODS = [
     { id: 'card', ko: '신용·체크카드', en: 'CARD' },
@@ -87,11 +91,10 @@
   global.MTM_DATA = {
     REGIONS,
     SPOTS,
-    MAP_POS,
+    MAP_MARKERS,
     PAY_METHODS,
     FORM_OPTIONS,
     PRICE_WON: 5000,
-    SHOW_ADMIN_LINK: true,
     LS_KEY: 'mtm_proto_v1',
   };
 })(window);

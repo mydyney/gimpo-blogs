@@ -148,24 +148,14 @@ button { font-family: inherit; }
 }
 .field textarea { resize: vertical; }
 
-/* ===== Image placeholder slots (photos not provided yet) ===== */
-.ph {
+/* ===== Place photos ===== */
+.place-photo {
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 8px;
-  font-family: var(--font-display);
-  font-size: 10px;
-  letter-spacing: 1.5px;
-  color: var(--text-muted);
-  text-transform: uppercase;
+  display: block;
+  object-fit: cover;
+  object-position: center;
 }
-.ph-0 { background: var(--pale-blue); }
-.ph-1 { background: var(--pale-mist); }
-.ph-2 { background: #e9e6d8; }
 
 /* ===== Header ===== */
 .site-header {
@@ -359,18 +349,26 @@ button { font-family: inherit; }
 .planner-grid { display: grid; grid-template-columns: 280px 1fr; gap: 40px; margin-top: 36px; align-items: start; }
 .region-rail { display: flex; flex-direction: column; gap: 8px; }
 
-.jp-map { position: relative; background: var(--pale-blue); margin-bottom: 8px; }
-.jp-map svg { width: 100%; display: block; }
+.jp-map {
+  position: relative;
+  overflow: hidden;
+  background: var(--pale-blue);
+  margin-bottom: 8px;
+  aspect-ratio: 2000 / 2550;
+}
+.jp-map img { width: 100%; height: 100%; display: block; }
 .map-marker {
   position: absolute;
   transform: translate(-50%, -50%);
-  display: flex;
-  align-items: center;
-  gap: 6px;
+  width: 18px;
+  height: 18px;
+  display: grid;
+  place-items: center;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px;
+  padding: 0;
+  z-index: 1;
 }
 .map-marker .dot {
   width: 12px;
@@ -382,9 +380,22 @@ button { font-family: inherit; }
   transition: background-color 0.2s ease;
 }
 .map-marker.active .dot { width: 18px; height: 18px; background: var(--cta-green); }
+.map-marker.place .dot { width: 7px; height: 7px; border-width: 1px; }
+.map-marker.place.active .dot { width: 9px; height: 9px; }
 .map-marker.picked .dot { background: var(--mint); }
 .map-marker.active.picked .dot { background: var(--cta-green); }
-.map-marker .lbl { font-size: 12px; font-weight: 700; color: var(--text-primary); white-space: nowrap; }
+.map-marker .lbl {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(var(--label-x), calc(-50% + var(--label-y)));
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  text-shadow: 0 1px 0 var(--pale-blue), 1px 0 0 var(--pale-blue), 0 -1px 0 var(--pale-blue), -1px 0 0 var(--pale-blue);
+}
+.map-marker.place .lbl { font-size: 10px; }
 .map-marker.active .lbl { font-weight: 900; color: var(--cta-green); }
 
 .region-tile {
@@ -640,6 +651,15 @@ button { font-family: inherit; }
 .admin-detail .ad-form { margin-top: 20px; display: flex; flex-direction: column; gap: 14px; }
 .admin-detail .ad-actions { display: flex; align-items: center; gap: 14px; }
 .admin-placeholder { background: var(--pale-mist); padding: 48px 32px; text-align: center; font-size: 14px; color: var(--text-muted); }
+.admin-host-badge {
+  margin-left: auto;
+  padding: 7px 12px;
+  background: var(--pale-mist);
+  color: var(--text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
 
 /* ===== Footer ===== */
 .site-footer { background: var(--brand-green); color: #fff; }
@@ -656,15 +676,6 @@ button { font-family: inherit; }
 .site-footer .ft-sub { opacity: 0.8; margin-top: 6px; }
 .site-footer .ft-links { display: flex; gap: 20px; opacity: 0.9; align-items: center; }
 .site-footer .ft-links a { color: #fff; }
-.admin-link-btn {
-  background: rgba(255, 255, 255, 0.15);
-  border: none;
-  color: #fff;
-  cursor: pointer;
-  font-size: 11px;
-  letter-spacing: 1px;
-  padding: 6px 12px;
-}
 
 /* ===== Responsive (prototype is desktop-first; graceful stacking below 960px) ===== */
 @media (max-width: 960px) {
