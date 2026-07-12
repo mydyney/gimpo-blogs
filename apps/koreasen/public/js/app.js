@@ -290,8 +290,16 @@
     }
     const activeRegion = D.REGIONS.find((r) => r.id === ui.region) || visibleRegions()[0] || D.REGIONS[0];
 
+    // Label anchor per side keeps neighbouring markers from colliding.
+    const LABEL_SIDES = {
+      right: { x: 2.2, y: 0.9, anchor: 'start' },
+      left: { x: -2.2, y: 0.9, anchor: 'end' },
+      top: { x: 0, y: -2.4, anchor: 'middle' },
+      bottom: { x: 0, y: 3.6, anchor: 'middle' },
+    };
     const markers = (D.SPOTS[activeRegion.id] || []).filter((spot) => spot.mapPos).map((spot) => ({
       id: spot.id, regionId: activeRegion.id, label: spot.mapLabel || spot.ko, pos: spot.mapPos,
+      side: LABEL_SIDES[spot.labelSide] || LABEL_SIDES.right,
     })).map((marker) => {
       const active = ui.region === marker.regionId;
       const picked = ui.sel.some((x) => x.regionId === marker.regionId && x.spotId === marker.id);
@@ -299,7 +307,8 @@
       return (
         '<g class="map-marker place' + (active ? ' active' : '') + (picked ? ' picked' : '') + '" transform="translate(' + pos[0] + ' ' + pos[1] + ')"' +
         ' data-act="map-spot" data-region="' + marker.regionId + '" data-spot="' + marker.id + '" role="button" tabindex="0" aria-label="' + esc(marker.label) + ' 선택">' +
-        '<circle class="dot" r="1.35"></circle><text class="lbl" x="2.2" y=".9">' + esc(marker.label) + '</text>' +
+        '<circle class="dot" r="1.35"></circle>' +
+        '<text class="lbl" x="' + marker.side.x + '" y="' + marker.side.y + '" text-anchor="' + marker.side.anchor + '">' + esc(marker.label) + '</text>' +
         '</g>'
       );
     }).join('');
