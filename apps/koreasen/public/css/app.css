@@ -354,9 +354,9 @@ button { font-family: inherit; }
   overflow: hidden;
   background: var(--pale-blue);
   margin-bottom: 8px;
-  aspect-ratio: 720 / 760;
+  aspect-ratio: 1;
 }
-.jp-map img { width: 100%; height: 100%; display: block; }
+.jp-map img { width: 100%; height: 100%; display: block; object-fit: cover; }
 .map-overlay { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
 .map-marker {
   color: #288068;

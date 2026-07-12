@@ -346,7 +346,7 @@
       sectionTitle('여행 계획 요청 · 1단계', 'PICK YOUR SPOTS', '지역을 고른 뒤, 가고 싶은 관광지를 선택해 주세요') +
       '<div class="planner-grid">' +
       '<div class="region-rail">' +
-      '<div class="jp-map tokyo-map"><img src="' + esc(activeRegion.map || '/images/japan-regions.svg') + '" alt="' + esc(activeRegion.ko) + ' 상세 지도">' + markerLayer + '</div>' +
+      '<div class="jp-map tokyo-map"><img src="' + esc(activeRegion.map || '/images/tokyo-kanto-map-ai.png') + '" alt="' + esc(activeRegion.ko) + ' 상세 지도">' + markerLayer + '</div>' +
       tiles +
       '</div>' +
       '<div>' +

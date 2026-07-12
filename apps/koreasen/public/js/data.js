@@ -3,8 +3,8 @@
   'use strict';
 
   const REGIONS = [
-    { id: 'tokyo', ko: '도쿄', en: 'TOKYO', desc: '골목 단위까지 상세 안내 가능한 중심 지역', main: true, note: '도쿄메이트의 홈그라운드 — 가장 상세한 안내가 가능해요', map: '/images/tokyo-city-map.svg' },
-    { id: 'kanto', ko: '도쿄 근교', en: 'AROUND TOKYO', desc: '요코하마 · 가마쿠라 · 하코네 · 닛코', note: '도쿄에서 당일치기로 다녀올 수 있어요', map: '/images/tokyo-kanto-map.svg' },
+    { id: 'tokyo', ko: '도쿄', en: 'TOKYO', desc: '골목 단위까지 상세 안내 가능한 중심 지역', main: true, note: '도쿄메이트의 홈그라운드 — 가장 상세한 안내가 가능해요', map: '/images/tokyo-city-map-ai.png' },
+    { id: 'kanto', ko: '도쿄 근교', en: 'AROUND TOKYO', desc: '요코하마 · 가마쿠라 · 하코네 · 닛코', note: '도쿄에서 당일치기로 다녀올 수 있어요', map: '/images/tokyo-kanto-map-ai.png' },
     { id: 'kansai', ko: '간사이', en: 'KANSAI', desc: '오사카 · 교토 · 나라', note: '도쿄와 신칸센으로 연결되는 대표 서브 지역' },
     { id: 'kyushu', ko: '규슈', en: 'KYUSHU', desc: '후쿠오카 · 유후인 · 벳푸', note: '온천과 미식의 남쪽 지역' },
     { id: 'hokkaido', ko: '홋카이도', en: 'HOKKAIDO', desc: '삿포로 · 오타루 · 후라노', note: '설경과 자연이 좋은 북쪽 지역' },
@@ -28,8 +28,8 @@
       { id: 'roppongi', ko: '롯폰기 · 도쿄타워', en: 'ROPPONGI', cat: '야경 · 미술관', mapPos: [47, 61], mapLabel: '롯폰기' },
     ],
     kanto: [
-      { id: 'yokohama', ko: '요코하마 미나토미라이', en: 'YOKOHAMA', cat: '항구 · 야경', mapPos: [43, 72], mapLabel: '요코하마' },
-      { id: 'kamakura', ko: '가마쿠라 · 에노시마', en: 'KAMAKURA', cat: '바다 · 사찰', mapPos: [39, 82], mapLabel: '가마쿠라' },
+      { id: 'yokohama', ko: '요코하마 미나토미라이', en: 'YOKOHAMA', cat: '항구 · 야경', mapPos: [55, 74], mapLabel: '요코하마' },
+      { id: 'kamakura', ko: '가마쿠라 · 에노시마', en: 'KAMAKURA', cat: '바다 · 사찰', mapPos: [49, 84], mapLabel: '가마쿠라' },
       { id: 'hakone', ko: '하코네 온천', en: 'HAKONE', cat: '온천 · 후지산 뷰', mapPos: [27, 79], mapLabel: '하코네' },
       { id: 'nikko', ko: '닛코 도쇼구', en: 'NIKKO', cat: '세계유산 · 자연', mapPos: [39, 20], mapLabel: '닛코' },
     ],

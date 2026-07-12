@@ -89,11 +89,9 @@ npx wrangler pages secret put AUTH_CODE_SECRET
 - **사진**: Wikimedia Commons 공개 라이선스 이미지 사용 — 운영 전 브랜드 사진으로 교체 여부 검토
 - **관리자 화면**: 관리자 전용 호스트 + HTTP Basic Auth 적용. 운영 전 Cloudflare Access 등 계정별 접근 제어 권장
 
-## 지도 출처
+## 지도 이미지
 
-일본 지역 지도는 Wikimedia Commons의
-[Regions and Prefectures of Japan-blank.svg](https://commons.wikimedia.org/wiki/File:Regions_and_Prefectures_of_Japan-blank.svg)를
-서비스 색상과 표시 범위에 맞게 수정했으며, 원본과 수정본은 CC BY-SA 4.0 조건을 따릅니다.
+도쿄 및 도쿄 근교 지도 배경은 서비스 전용으로 생성한 독자적인 AI 이미지입니다. 장소명과 위치 마커는 이미지에 포함하지 않고 사이트 데이터에서 별도로 표시합니다.
 
 관광지 사진은 Wikimedia Commons의 공개 라이선스 이미지를 사용합니다. 개별 저작자와 라이선스는
 [사진 출처 목록](public/images/spots/ATTRIBUTION.md)에 정리되어 있습니다.
