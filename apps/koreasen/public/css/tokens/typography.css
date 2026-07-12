@@ -1,0 +1,25 @@
+/* mytokyomate typography — Tokyo Midtown editorial scale, Korean-first.
+   Body 1.5 line-height; big display copy 1.0; letter-spacing 1–2px on display. */
+:root {
+  /* Sizes */
+  --text-hero-number: 72px;      /* Outfit 100, lh 1.0 — key-visual numbers */
+  --text-section-title: 28px;    /* Outfit 400, lh 1.0, ls 2px — Latin section titles */
+  --text-h3: 18px;               /* body font 700, lh 1.5 */
+  --text-h2-round: 18px;         /* round font, lh 1.0, ls 2px — decorative */
+  --text-h2-utility: 16px;       /* body font 700, lh 1.0 */
+  --text-body: 14px;             /* lh 1.5 (21px) */
+  --text-caption: 13px;          /* lh 1.5 */
+  --text-cta: 12px;              /* lh 1.5, ls 0.5px */
+  --text-tag: 12px;              /* lh 1.5, ls 1px */
+  --text-mini: 11px;
+
+  /* Line heights */
+  --lh-body: 1.5;
+  --lh-display: 1.0;
+  --lh-menu-loose: 50px;         /* extreme loose menu lists (reference motif) */
+
+  /* Letter spacing */
+  --ls-display: 2px;
+  --ls-cta: 0.5px;
+  --ls-tag: 1px;
+}

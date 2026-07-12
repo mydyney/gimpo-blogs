@@ -1,0 +1,39 @@
+/* mytokyomate colors — adapted from Tokyo Midtown DESIGN.md (computed styles).
+   Green-family gradations only; no other primaries. Flat, shadowless. */
+:root {
+  /* Brand */
+  --brand-green: #009842;        /* Midtown Green — logo, brand marks, facility labels */
+  --cta-green: #1b9532;          /* CTA green — pills & square CTAs */
+  --green-dark: #288068;         /* pager inactive / deep accents */
+  --mint: #4abb9d;               /* active states, sliders */
+
+  /* Accent */
+  --sand: #b8b081;               /* sister-brand / secondary destination accent */
+  --pale-blue: #dce7eb;          /* utility CTA background */
+  --pale-mist: #eff3f5;          /* language switcher / soft bands */
+
+  /* Text */
+  --text-primary: #101211;       /* near-black (never #000) */
+  --text-secondary: #333333;
+  --text-muted: #51606e;
+  --text-on-dark: #ffffff;
+  --text-on-brand: #ffffff;
+
+  /* Surface */
+  --surface-bg: #ffffff;
+  --surface-mist: #eff3f5;
+  --surface-pale-blue: #dce7eb;
+  --surface-dark: #101211;
+  --surface-overlay: rgba(16, 18, 17, 0.8);
+  --surface-brand: #009842;
+  --surface-card: #ffffff;
+
+  /* Semantic aliases */
+  --interactive-primary: var(--cta-green);
+  --interactive-primary-hover: #157a28;
+  --interactive-selected: var(--mint);
+
+  /* Links */
+  --link: var(--cta-green);
+  --link-hover: var(--brand-green);
+}

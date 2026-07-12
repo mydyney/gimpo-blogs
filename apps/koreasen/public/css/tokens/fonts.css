@@ -1,0 +1,17 @@
+/* mytokyomate webfonts
+   Reference (Tokyo Midtown) uses Morisawa TypeSquare fonts (中ゴシック BBB / 太ゴ B101 / 秀英丸ゴ L)
+   + gidoleregular / HelveticaNeue-Thin. None are freely distributable, and the primary
+   audience is KOREAN, so we substitute Google Fonts:
+     中ゴシック BBB (body)        → Noto Sans KR (ko) / Noto Sans JP (ja place names)
+     太ゴ B101 (emphasis)         → Noto Sans KR 700–900
+     秀英丸ゴ L (decorative round) → Jua (rounded Hangul gothic)
+     gidoleregular / Helvetica Neue Thin (Latin display) → Outfit (100–700)
+*/
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;700&family=Jua&family=Outfit:wght@100;200;300;400;500;600&display=swap');
+
+:root {
+  --font-body: "Noto Sans KR", "Noto Sans JP", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --font-body-jp: "Noto Sans JP", "Noto Sans KR", "Hiragino Kaku Gothic Pro", "Yu Gothic", sans-serif;
+  --font-round: "Jua", "Noto Sans KR", sans-serif;
+  --font-display: "Outfit", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}

@@ -1,0 +1,25 @@
+/* mytokyomate spacing, radii, layout — flat & shadowless like the reference. */
+:root {
+  /* Spacing scale */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 48px;
+  --space-6: 64px;
+  --space-8: 128px;
+
+  /* Radii — three CTA systems coexist */
+  --radius-none: 0px;            /* cards, square CTAs */
+  --radius-tag: 3px;             /* tags/badges only */
+  --radius-pager: 5px;
+  --radius-pill: 56px;           /* solid pill CTA */
+  --radius-full: 9999px;         /* outline pill CTA */
+
+  /* Layout */
+  --content-width: 1280px;
+  --content-narrow: 720px;
+
+  /* Elevation — none. Depth via surface bands, not shadows. */
+  --shadow-none: none;
+}
