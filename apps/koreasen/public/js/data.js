@@ -24,6 +24,7 @@
       { id: 'tsukiji', ko: '쓰키지 장외시장', en: 'TSUKIJI', cat: '시장 · 미식' },
       { id: 'kichijoji', ko: '기치조지 · 이노카시라', en: 'KICHIJOJI', cat: '공원 · 산책' },
       { id: 'tokyodome', ko: '도쿄돔 시티', en: 'TOKYO DOME CITY', cat: '테마파크 · 도심' },
+      { id: 'disney', ko: '도쿄 디즈니 리조트', en: 'DISNEY RESORT', cat: '테마파크 · 마이하마' },
       { id: 'roppongi', ko: '롯폰기 · 도쿄타워', en: 'ROPPONGI', cat: '야경 · 미술관' },
     ],
     kanto: [

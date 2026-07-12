@@ -160,7 +160,7 @@
       '<div class="ft-sub">Tokyomate가 추천하는 일본 여행 가이드 · mytokyomate.com</div>' +
       '</div>' +
       '<div class="ft-links">' +
-      '<a href="/attribution.html" target="_blank" rel="noopener">사진·지도 출처</a>' +
+      '<a href="/attribution" target="_blank" rel="noopener">사진·지도 출처</a>' +
       '<a href="https://blog.naver.com/tokyomate">네이버 블로그</a>' +
       '<a href="https://tripmate.news/">tripmate.news</a>' +
       '</div>' +

@@ -15,6 +15,7 @@
 - tsukiji: [Tsukiji fish market](https://commons.wikimedia.org/wiki/File:2018_Tsukiji_fish_market.jpg) — Kakidai — CC BY-SA 4.0
 - kichijoji: [Kichijoji](https://commons.wikimedia.org/wiki/File:Kichijoji_-_panoramio_-_kcomiida.jpg) — kcomiida — CC BY-SA 3.0
 - tokyodome: [Tokyo Dome City Ferris Wheel](https://commons.wikimedia.org/wiki/File:Tokyo_Dome_City_Ferris_Wheel.jpg) — Lgarron — CC0
+- disney: [JR Maihama Station South Gate](https://commons.wikimedia.org/wiki/File:JRE_Maihama-STA_South-Gate.jpg) — MaedaAkihiko — CC BY-SA 4.0 (도쿄 디즈니 리조트 관문역. 디즈니 상표·캐릭터가 없는 중립 이미지를 사용)
 - roppongi: [Roppongi night](https://commons.wikimedia.org/wiki/File:Roppongi_night.jpg) — Manone — Public domain
 - yokohama: [Minato Mirai in Blue](https://commons.wikimedia.org/wiki/File:Minato_Mirai_In_Blue.jpg) — akumach — CC BY 2.0
 - kamakura: [Tsurugaoka Hachimangu](https://commons.wikimedia.org/wiki/File:TsurugaokaHachiman-M8867.jpg) — Fg2 — Public domain
