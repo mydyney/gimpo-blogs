@@ -3,3 +3,8 @@
 name = "koreasen"
 compatibility_date = "2026-07-12"
 pages_build_output_dir = "public"
+
+# Shared site config (which regions are visible, etc.)
+[[kv_namespaces]]
+binding = "SITE_CONFIG"
+id = "2443029ad9574fb1a32871b693134489"

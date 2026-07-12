@@ -7,6 +7,22 @@
   const store = S.store;
   const IS_ADMIN_HOST = location.hostname === 'admin.mytokyomate.com' || location.hostname === 'admin.localhost';
 
+  // Which regions are exposed on the site. null = show all (until the shared
+  // config loads / when unset). Seeded from a localStorage cache for an instant
+  // correct first paint, then refreshed from /api/regions (KV-backed).
+  let visibleRegionIds = null;
+  try {
+    const cached = JSON.parse(localStorage.getItem('mtm_visible_regions') || 'null');
+    if (Array.isArray(cached)) visibleRegionIds = cached;
+  } catch (e) { /* ignore */ }
+
+  function isRegionVisible(id) {
+    return visibleRegionIds === null || visibleRegionIds.indexOf(id) >= 0;
+  }
+  function visibleRegions() {
+    return D.REGIONS.filter((r) => isRegionVisible(r.id));
+  }
+
   // Ephemeral UI state (not persisted — mirrors the prototype's non-saved state)
   const ui = {
     region: 'tokyo',
@@ -16,6 +32,7 @@
     loginStep: 'email', emailInput: '', codeInput: '', demoCode: '', loginErr: '', afterLogin: null,
     notifOpen: false,
     adminSel: null, adminTitle: '', adminBody: '',
+    adminRegions: null, adminRegionsSaved: false,
   };
 
   const viewEl = document.getElementById('view');
@@ -186,7 +203,7 @@
       ['04', '가이드 도착 알림', '일정이 완성되면 알림이 오고, 마이페이지에서 확인합니다.'],
     ];
     const highlights = D.SPOTS.tokyo.slice(0, 4);
-    const subRegions = D.REGIONS.filter((r) => !r.main).slice(0, 5);
+    const subRegions = visibleRegions().filter((r) => !r.main).slice(0, 5);
 
     return (
       '<main>' +
@@ -228,18 +245,20 @@
       '</div>' +
       '</section>' +
 
-      '<section class="subregions-band"><div class="inner">' +
-      sectionTitle('서브 지역', 'MORE REGIONS', '도쿄와 함께, 또는 도쿄 다음으로 좋은 지역들') +
-      '<div class="sr-grid">' +
-      subRegions.map((r) =>
-        '<button class="sr-card" data-act="go-plan-region" data-region="' + r.id + '">' +
-        '<div class="sr-en">' + esc(r.en) + '</div>' +
-        '<div class="sr-ko">' + esc(r.ko) + '</div>' +
-        '<div class="sr-desc">' + esc(r.desc) + '</div>' +
-        '</button>'
-      ).join('') +
-      '</div>' +
-      '</div></section>' +
+      (subRegions.length > 0
+        ? '<section class="subregions-band"><div class="inner">' +
+          sectionTitle('서브 지역', 'MORE REGIONS', '도쿄와 함께, 또는 도쿄 다음으로 좋은 지역들') +
+          '<div class="sr-grid">' +
+          subRegions.map((r) =>
+            '<button class="sr-card" data-act="go-plan-region" data-region="' + r.id + '">' +
+            '<div class="sr-en">' + esc(r.en) + '</div>' +
+            '<div class="sr-ko">' + esc(r.ko) + '</div>' +
+            '<div class="sr-desc">' + esc(r.desc) + '</div>' +
+            '</button>'
+          ).join('') +
+          '</div>' +
+          '</div></section>'
+        : '') +
 
       '<section class="cta-band"><div class="inner">' +
       '<div>' +
@@ -256,9 +275,14 @@
     '<img src="/images/japan-regions.svg" alt="홋카이도부터 오키나와까지 실제 지형 비율을 반영한 일본 지도">';
 
   function viewPlanner() {
-    const activeRegion = D.REGIONS.find((r) => r.id === ui.region) || D.REGIONS[0];
+    // Keep the active region within the visible set.
+    if (!isRegionVisible(ui.region)) {
+      const first = visibleRegions()[0];
+      ui.region = first ? first.id : 'tokyo';
+    }
+    const activeRegion = D.REGIONS.find((r) => r.id === ui.region) || visibleRegions()[0] || D.REGIONS[0];
 
-    const markers = D.MAP_MARKERS.map((marker) => {
+    const markers = D.MAP_MARKERS.filter((m) => isRegionVisible(m.regionId)).map((marker) => {
       const active = ui.region === marker.regionId;
       const cnt = ui.sel.filter((x) => x.regionId === marker.regionId).length;
       const pos = marker.pos;
@@ -272,7 +296,7 @@
       );
     }).join('');
 
-    const tiles = D.REGIONS.map((r) => {
+    const tiles = visibleRegions().map((r) => {
       const active = ui.region === r.id;
       const count = ui.sel.filter((x) => x.regionId === r.id).length;
       return (
@@ -531,6 +555,37 @@
     );
   }
 
+  function viewRegionSettings() {
+    if (ui.adminRegions === null) {
+      ui.adminRegions = (visibleRegionIds === null) ? D.REGIONS.map((r) => r.id) : visibleRegionIds.slice();
+    }
+    const toggles = D.REGIONS.map((r) => {
+      const on = ui.adminRegions.indexOf(r.id) >= 0;
+      return (
+        '<label class="rv-item' + (on ? ' on' : '') + '">' +
+        '<input type="checkbox" data-region-toggle="' + r.id + '"' + (on ? ' checked' : '') + '>' +
+        '<span class="rv-ko">' + esc(r.ko) + '</span>' +
+        '<span class="rv-en">' + esc(r.en) + '</span>' +
+        '</label>'
+      );
+    }).join('');
+    const count = ui.adminRegions.length;
+    const hint = count === 0
+      ? '최소 한 지역은 선택해야 합니다'
+      : (ui.adminRegionsSaved ? '저장되었습니다 ✓ (방문자 화면에는 최대 30초 이내 반영)' : '');
+    return (
+      '<div class="admin-regions">' +
+      '<div class="ar-title">노출 지역 설정</div>' +
+      '<div class="ar-desc">체크한 지역만 홈과 여행 계획 화면에 노출됩니다. 저장하면 모든 방문자에게 적용됩니다.</div>' +
+      '<div class="rv-grid">' + toggles + '</div>' +
+      '<div class="ad-actions">' +
+      '<button class="btn btn-pill" id="save-regions" data-act="save-regions"' + (count === 0 ? ' disabled' : '') + '>노출 지역 저장</button>' +
+      '<span class="form-hint" id="rv-hint">' + esc(hint) + '</span>' +
+      '</div>' +
+      '</div>'
+    );
+  }
+
   function viewAdmin() {
     const reqs = store.requests.slice().reverse();
     const aq = store.requests.find((q) => q.id === ui.adminSel);
@@ -585,9 +640,11 @@
     return (
       '<main class="page">' +
       '<div class="admin-head">' +
-      sectionTitle('관리자', 'ADMIN', '접수된 요청에 여행 가이드를 등록합니다') +
+      sectionTitle('관리자', 'ADMIN', '노출 지역을 설정하고, 접수된 요청에 가이드를 등록합니다') +
       '<span class="admin-tag">내부용 화면</span>' +
       '</div>' +
+      viewRegionSettings() +
+      '<div class="admin-section-title">여행 계획 요청</div>' +
       (reqs.length === 0
         ? '<div class="admin-empty">아직 접수된 요청이 없습니다. 사용자가 결제를 완료하면 이곳에 표시됩니다.</div>'
         : '<div class="admin-grid"><div class="admin-list">' + list + '</div>' + detail + '</div>') +
@@ -669,6 +726,56 @@
     ui.adminTitle = '';
     ui.adminBody = '';
     render();
+  }
+
+  // ===== Shared region-visibility config (KV via /api/regions) =====
+  function applyRegionConfig(visible) {
+    const next = Array.isArray(visible)
+      ? visible.filter((id) => D.REGIONS.some((r) => r.id === id))
+      : null;
+    const changed = JSON.stringify(next) !== JSON.stringify(visibleRegionIds);
+    visibleRegionIds = next;
+    try { localStorage.setItem('mtm_visible_regions', JSON.stringify(next)); } catch (e) { /* ignore */ }
+    if (!isRegionVisible(ui.region)) {
+      const first = visibleRegions()[0];
+      ui.region = first ? first.id : 'tokyo';
+    }
+    return changed;
+  }
+
+  function fetchRegionConfig() {
+    return fetch('/api/regions', { headers: { Accept: 'application/json' } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data && Object.prototype.hasOwnProperty.call(data, 'visible')) {
+          const changed = applyRegionConfig(data.visible);
+          if (changed) { ui.adminRegions = null; render(); }
+        }
+      })
+      .catch(() => { /* offline / not deployed — keep cached/default */ });
+  }
+
+  function saveRegions() {
+    if (!ui.adminRegions || ui.adminRegions.length === 0) return;
+    const btn = document.getElementById('save-regions');
+    const hint = document.getElementById('rv-hint');
+    if (btn) btn.disabled = true;
+    if (hint) hint.textContent = '저장 중…';
+    fetch('/api/regions', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ visible: ui.adminRegions }),
+    })
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error('save_failed'))))
+      .then((data) => {
+        applyRegionConfig(data.visible);
+        ui.adminRegionsSaved = true;
+        render();
+      })
+      .catch(() => {
+        if (btn) btn.disabled = false;
+        if (hint) hint.textContent = '저장에 실패했습니다. 다시 시도해 주세요.';
+      });
   }
 
   document.addEventListener('click', (e) => {
@@ -768,7 +875,20 @@
         render();
         break;
       case 'register-guide': registerGuide(); break;
+      case 'save-regions': saveRegions(); break;
     }
+  });
+
+  document.addEventListener('change', (e) => {
+    const rt = e.target.closest('[data-region-toggle]');
+    if (!rt) return;
+    const id = rt.getAttribute('data-region-toggle');
+    if (ui.adminRegions === null) ui.adminRegions = [];
+    const idx = ui.adminRegions.indexOf(id);
+    if (idx >= 0) ui.adminRegions = ui.adminRegions.filter((x) => x !== id);
+    else ui.adminRegions = ui.adminRegions.concat([id]);
+    ui.adminRegionsSaved = false;
+    render();
   });
 
   // --- live input handling (no full re-render → keeps focus/caret) ---
@@ -830,4 +950,5 @@
   // ===== Boot =====
   S.load();
   render();
+  fetchRegionConfig();
 })();

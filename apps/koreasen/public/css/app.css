@@ -661,6 +661,28 @@ button { font-family: inherit; }
   letter-spacing: 1px;
 }
 
+/* Admin — region visibility settings */
+.admin-regions { margin-top: 32px; background: var(--pale-mist); padding: 28px 32px; }
+.admin-regions .ar-title { font-weight: 900; font-size: 16px; }
+.admin-regions .ar-desc { font-size: 13px; color: var(--text-secondary); margin-top: 8px; line-height: 1.6; }
+.rv-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 18px 0; }
+.rv-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  background: #fff;
+  border: 2px solid #e5e5e5;
+  padding: 14px 16px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+.rv-item.on { border-color: var(--mint); background: var(--pale-blue); }
+.rv-item input { width: 16px; height: 16px; accent-color: var(--cta-green); cursor: pointer; }
+.rv-item .rv-ko { font-weight: 700; font-size: 14px; }
+.rv-item .rv-en { font-family: var(--font-display); font-size: 10px; letter-spacing: 1.5px; color: var(--text-muted); text-transform: uppercase; }
+.admin-section-title { font-weight: 900; font-size: 16px; margin: 40px 0 16px; }
+@media (max-width: 640px) { .rv-grid { grid-template-columns: 1fr 1fr; } }
+
 /* ===== Footer ===== */
 .site-footer { background: var(--brand-green); color: #fff; }
 .site-footer .inner {
