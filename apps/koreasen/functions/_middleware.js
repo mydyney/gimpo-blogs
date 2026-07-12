@@ -30,13 +30,25 @@ function safeEqual(a, b) {
   return diff === 0;
 }
 
+function harden(response) {
+  const hardened = new Response(response.body, response);
+  hardened.headers.set('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+  hardened.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin');
+  hardened.headers.set('X-Content-Type-Options', 'nosniff');
+  hardened.headers.set('X-Frame-Options', 'DENY');
+  hardened.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  return hardened;
+}
+
 export async function onRequest(context) {
   const { request, next, env } = context;
   const adminHost = env.ADMIN_HOST || DEFAULT_ADMIN_HOST;
   const host = new URL(request.url).hostname;
 
-  // Not the admin host → serve the site normally.
-  if (host !== adminHost) return next();
+  // Not the admin host → serve the site normally, with baseline browser hardening.
+  if (host !== adminHost) {
+    return harden(await next());
+  }
 
   // Admin host but no credentials configured → stay locked (fail closed).
   if (!env.ADMIN_USER || !env.ADMIN_PASS) return unauthorized();
@@ -50,7 +62,7 @@ export async function onRequest(context) {
       const user = decoded.slice(0, idx);
       const pass = decoded.slice(idx + 1);
       if (safeEqual(user, env.ADMIN_USER) && safeEqual(pass, env.ADMIN_PASS)) {
-        return next();
+        return harden(await next());
       }
     }
   }

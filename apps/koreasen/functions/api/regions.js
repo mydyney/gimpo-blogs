@@ -37,9 +37,21 @@ export async function onRequestGet(context) {
 
 export async function onRequestPut(context) {
   const { request, env } = context;
+  const url = new URL(request.url);
   const adminHost = env.ADMIN_HOST || 'admin.mytokyomate.com';
-  if (new URL(request.url).hostname !== adminHost) {
+  if (url.hostname !== adminHost) {
     return json({ ok: false, error: 'forbidden' }, { status: 403 });
+  }
+  const origin = request.headers.get('Origin');
+  const fetchSite = request.headers.get('Sec-Fetch-Site');
+  if ((origin && origin !== url.origin) || (fetchSite && fetchSite !== 'same-origin')) {
+    return json({ ok: false, error: 'forbidden' }, { status: 403 });
+  }
+  if (!(request.headers.get('Content-Type') || '').toLowerCase().startsWith('application/json')) {
+    return json({ ok: false, error: 'invalid_content_type' }, { status: 415 });
+  }
+  if (Number(request.headers.get('Content-Length') || 0) > 2048) {
+    return json({ ok: false, error: 'payload_too_large' }, { status: 413 });
   }
   if (!env.SITE_CONFIG) {
     return json({ ok: false, error: 'kv_not_configured' }, { status: 501 });
@@ -49,8 +61,9 @@ export async function onRequestPut(context) {
     return json({ ok: false, error: 'bad_json' }, { status: 400 });
   }
   const visible = Array.isArray(data && data.visible)
-    ? data.visible.filter((x) => VALID.includes(x))
+    ? [...new Set(data.visible.filter((x) => VALID.includes(x)))]
     : [];
+  if (visible.length === 0) return json({ ok: false, error: 'at_least_one_region' }, { status: 400 });
   await env.SITE_CONFIG.put(KEY, JSON.stringify(visible));
   return json({ ok: true, visible }, { headers: { 'Cache-Control': 'no-store' } });
 }

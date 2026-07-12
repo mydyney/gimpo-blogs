@@ -1,10 +1,16 @@
 # mytokyomate (apps/koreasen) — Cloudflare Pages
 # Deploy from this directory:  npx wrangler pages deploy
 name = "koreasen"
-compatibility_date = "2026-07-12"
+compatibility_date = "2026-06-18"
 pages_build_output_dir = "public"
 
 # Shared site config (which regions are visible, etc.)
 [[kv_namespaces]]
 binding = "SITE_CONFIG"
 id = "2443029ad9574fb1a32871b693134489"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "koreasen"
+database_id = "fb39cf58-e6f3-435d-b49e-c23591114243"
+migrations_dir = "migrations"

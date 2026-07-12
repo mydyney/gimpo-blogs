@@ -27,9 +27,10 @@
   const ui = {
     region: 'tokyo',
     sel: [],                                   // [{regionId, spotId}]
-    form: { count: '2명', group: '커플 · 부부', date: '', duration: '3박 4일', budget: '100~200만원', lodging: '', notes: '' },
-    payMethod: 'card', cardNum: '', cardExp: '', cardCvc: '',
-    loginStep: 'email', emailInput: '', codeInput: '', demoCode: '', loginErr: '', afterLogin: null,
+    form: { count: '2명', group: '커플 · 부부', phone: '', date: '', duration: '3박 4일', budget: '100~200만원', lodging: '', notes: '' },
+    payMethod: 'card',
+    emailInput: '', authName: '', authPassword: '', authConfirm: '', authErr: '', authBusy: false, afterLogin: null,
+    requestBusy: false, requestErr: '', adminBusy: false, adminErr: '',
     notifOpen: false,
     adminSel: null, adminTitle: '', adminBody: '',
     adminRegions: null, adminRegionsSaved: false,
@@ -73,6 +74,7 @@
     if (p === '/plan/pay') return { name: 'pay' };
     if (p === '/plan/done') return { name: 'done' };
     if (p === '/login') return { name: 'login' };
+    if (p === '/signup') return { name: 'signup' };
     if (p === '/my') return { name: 'mypage' };
     if (p === '/admin') return { name: 'admin' };
     const guide = p.match(/^\/guide\/([\w-]+)$/);
@@ -83,6 +85,11 @@
   // Route guards — return a redirect path or null
   function guard(route) {
     if (route.name === 'admin' && !IS_ADMIN_HOST) return '/';
+    if ((route.name === 'login' || route.name === 'signup') && store.user) {
+      const next = ui.afterLogin || '/my';
+      ui.afterLogin = null;
+      return next;
+    }
     if (route.name === 'info' && ui.sel.length === 0) return '/plan';
     if (route.name === 'pay') {
       if (ui.sel.length === 0) return '/plan';
@@ -95,9 +102,10 @@
   }
 
   function resetLogin() {
-    ui.loginStep = 'email';
-    ui.codeInput = '';
-    ui.loginErr = '';
+    ui.authPassword = '';
+    ui.authConfirm = '';
+    ui.authErr = '';
+    ui.authBusy = false;
   }
 
   // ===== Header / footer =====
@@ -145,7 +153,9 @@
           '</div>';
       }
     } else {
-      right = '<a class="btn btn-outline" href="/login" data-nav>로그인</a>';
+      right =
+        '<a class="header-signup" href="/signup" data-nav>가입하기</a>' +
+        '<a class="btn btn-outline" href="/login" data-nav>로그인</a>';
     }
 
     headerEl.innerHTML =
@@ -371,7 +381,7 @@
   }
 
   function viewInfo() {
-    const incomplete = !ui.form.date;
+    const incomplete = phoneIncomplete() || !ui.form.date;
     return (
       '<main class="page page-narrow">' +
       sectionTitle('여행 계획 요청 · 2단계', 'YOUR TRIP DETAILS', '일정을 짜는 데 필요한 정보를 알려 주세요') +
@@ -381,26 +391,30 @@
       selectField('동반자 구성', 'group', D.FORM_OPTIONS.group) +
       '</div>' +
       '<div class="form-row">' +
+      '<div class="field"><label>연락처</label><input type="tel" inputmode="tel" data-form="phone" placeholder="01012345678" value="' + esc(ui.form.phone) + '"></div>' +
       '<div class="field"><label>입국 날짜</label><input type="date" data-form="date" value="' + esc(ui.form.date) + '"></div>' +
-      selectField('여행 기간', 'duration', D.FORM_OPTIONS.duration) +
       '</div>' +
       '<div class="form-row">' +
+      selectField('여행 기간', 'duration', D.FORM_OPTIONS.duration) +
       selectField('예산 (1인 기준, 항공 제외)', 'budget', D.FORM_OPTIONS.budget) +
+      '</div>' +
+      '<div class="form-row">' +
       '<div class="field"><label>숙소 선호 지역</label><input type="text" data-form="lodging" placeholder="예: 신주쿠 · 시부야 인근" value="' + esc(ui.form.lodging) + '"></div>' +
       '</div>' +
       '<div class="field"><label>요청사항</label><textarea rows="4" data-form="notes" placeholder="아이 동반 여부, 못 먹는 음식, 꼭 하고 싶은 것 등을 자유롭게 적어 주세요">' + esc(ui.form.notes) + '</textarea></div>' +
       '<div class="form-actions">' +
       '<a class="btn btn-outline" href="/plan" data-nav>이전 단계</a>' +
       '<button class="btn btn-pill" id="info-next" data-act="go-pay"' + (incomplete ? ' disabled' : '') + '><span class="arrow">▶</span>요청 확인 및 결제</button>' +
-      '<span class="form-hint" id="info-hint">' + (incomplete ? '입국 날짜를 선택하면 다음으로 넘어갈 수 있어요' : '') + '</span>' +
+      '<span class="form-hint" id="info-hint">' + (incomplete ? '연락처와 입국 날짜를 입력하면 다음으로 넘어갈 수 있어요' : '') + '</span>' +
       '</div>' +
       '</div>' +
       '</main>'
     );
   }
 
-  function cardIncomplete() {
-    return ui.cardNum.replace(/\D/g, '').length < 12 || ui.cardExp.length < 5 || ui.cardCvc.length < 3;
+  function phoneIncomplete() {
+    const digits = String(ui.form.phone || '').replace(/\D/g, '');
+    return digits.length < 10 || digits.length > 11;
   }
 
   function viewPay() {
@@ -416,8 +430,7 @@
       ['요청사항', f.notes || '없음'],
     ];
     const methodObj = D.PAY_METHODS.find((m) => m.id === ui.payMethod) || D.PAY_METHODS[0];
-    const isCard = ui.payMethod === 'card';
-    const disabled = isCard && cardIncomplete();
+    const disabled = ui.requestBusy || phoneIncomplete();
 
     return (
       '<main class="page page-narrow">' +
@@ -438,13 +451,7 @@
         '</button>'
       ).join('') +
       '</div>' +
-      (isCard
-        ? '<div class="card-fields">' +
-          '<div class="field"><label>카드 번호</label><input type="text" inputmode="numeric" data-card="num" placeholder="0000 0000 0000 0000" value="' + esc(ui.cardNum) + '"></div>' +
-          '<div class="field"><label>유효기간</label><input type="text" inputmode="numeric" data-card="exp" placeholder="MM/YY" value="' + esc(ui.cardExp) + '"></div>' +
-          '<div class="field"><label>CVC</label><input type="text" inputmode="numeric" data-card="cvc" placeholder="123" value="' + esc(ui.cardCvc) + '"></div>' +
-          '</div>'
-        : '<div class="easy-note">결제하기를 누르면 ' + esc(methodObj.ko) + ' 결제창으로 이동합니다. 프로토타입에서는 바로 완료 처리됩니다.</div>') +
+      '<div class="easy-note">결제하기를 누르면 페이앱의 ' + esc(methodObj.ko) + ' 결제창으로 이동합니다. 결제가 완료된 요청만 관리자에게 접수됩니다.</div>' +
       '</div>' +
       '<div class="price-band">' +
       '<span class="pb-label">여행 계획 요청 1건</span>' +
@@ -452,8 +459,8 @@
       '</div>' +
       '<div class="pay-actions">' +
       '<a class="btn btn-outline" href="/plan/info" data-nav>이전 단계</a>' +
-      '<button class="btn btn-pill" id="pay-btn" data-act="do-pay"' + (disabled ? ' disabled' : '') + '><span class="arrow">▶</span>' + price + ' 결제하기</button>' +
-      '<span class="form-hint">프로토타입 결제입니다 — 실제 결제가 이루어지지 않습니다</span>' +
+      '<button class="btn btn-pill" id="pay-btn" data-act="do-pay"' + (disabled ? ' disabled' : '') + '><span class="arrow">▶</span>' + (ui.requestBusy ? '결제창 준비 중…' : price + ' 결제하기') + '</button>' +
+      '<span class="form-hint">' + esc(ui.requestErr || '페이앱 결제창에서 안전하게 결제합니다') + '</span>' +
       '</div>' +
       '</main>'
     );
@@ -477,25 +484,97 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ui.emailInput);
   }
 
-  function viewLogin() {
-    let body = '';
-    if (ui.loginStep === 'email') {
-      body =
-        '<div class="field"><label>이메일</label><input type="email" data-login="email" placeholder="you@example.com" value="' + esc(ui.emailInput) + '"></div>' +
-        '<button class="btn btn-pill btn-full" id="send-code" data-act="send-code"' + (emailValid() ? '' : ' disabled') + '>인증번호 받기</button>';
-    } else {
-      body =
-        '<div class="login-sent"><b>' + esc(ui.emailInput) + '</b> 주소로 인증번호를 보냈습니다.<br>메일함을 확인해 주세요.</div>' +
-        '<div class="demo-code">프로토타입 데모 — 인증번호: <b>' + esc(ui.demoCode) + '</b></div>' +
-        '<div class="field"><label>인증번호 6자리</label><input type="text" inputmode="numeric" maxlength="6" data-login="code" placeholder="123456" value="' + esc(ui.codeInput) + '"></div>' +
-        '<div class="login-err" id="login-err"' + (ui.loginErr ? '' : ' hidden') + '>' + esc(ui.loginErr) + '</div>' +
-        '<button class="btn btn-pill btn-full" id="verify-code" data-act="verify-code"' + (ui.codeInput.length === 6 ? '' : ' disabled') + '>로그인</button>' +
-        '<button class="link-btn" data-act="back-to-email">다른 이메일로 받기</button>';
+  function passwordStrong(value) {
+    return value.length >= 10 && value.length <= 128 && /[A-Za-z]/.test(value) && /\d/.test(value);
+  }
+
+  function authErrorMessage(code) {
+    const messages = {
+      invalid_credentials: '이메일 또는 비밀번호를 확인해 주세요.',
+      too_many_attempts: '로그인 시도가 너무 많습니다. 15분 후 다시 시도해 주세요.',
+      account_exists: '이미 가입된 이메일입니다. 로그인해 주세요.',
+      invalid_email: '올바른 이메일 주소를 입력해 주세요.',
+      invalid_name: '이름은 2자 이상 40자 이하로 입력해 주세요.',
+      weak_password: '비밀번호는 영문과 숫자를 포함해 10자 이상이어야 합니다.',
+      auth_unavailable: '인증 서비스를 잠시 사용할 수 없습니다.',
+    };
+    return messages[code] || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+  }
+
+  function authRequest(action, body) {
+    return fetch('/api/auth/' + action, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify(body || {}),
+    }).then((response) => response.json().catch(() => ({})).then((data) => {
+      if (!response.ok) throw new Error(data.error || 'request_failed');
+      return data;
+    }));
+  }
+
+  function apiRequest(url, options) {
+    const init = Object.assign({ headers: { Accept: 'application/json' }, credentials: 'same-origin' }, options || {});
+    return fetch(url, init).then((response) => response.json().catch(() => ({})).then((data) => {
+      if (!response.ok) throw new Error(data.error || 'request_failed');
+      return data;
+    }));
+  }
+
+  function loadUserData() {
+    if (!store.user) {
+      store.requests = [];
+      store.notifications = [];
+      return Promise.resolve();
     }
+    return Promise.all([
+      apiRequest('/api/requests'),
+      apiRequest('/api/notifications'),
+    ]).then(([requestData, notificationData]) => {
+      store.requests = (requestData.requests || []).slice().reverse();
+      store.notifications = (notificationData.notifications || []).slice().reverse();
+    });
+  }
+
+  function loadAdminRequests() {
+    if (!IS_ADMIN_HOST) return Promise.resolve();
+    ui.adminBusy = true;
+    ui.adminErr = '';
+    return apiRequest('/api/admin/requests')
+      .then((data) => { store.requests = (data.requests || []).slice().reverse(); })
+      .catch(() => { ui.adminErr = '요청 목록을 불러오지 못했습니다.'; })
+      .finally(() => { ui.adminBusy = false; render(); });
+  }
+
+  function viewLogin() {
     return (
       '<main class="page page-login">' +
-      sectionTitle('로그인', 'SIGN IN', '이메일로 받은 인증번호로 간편하게 로그인해요') +
-      '<div class="login-form">' + body + '</div>' +
+      sectionTitle('로그인', 'SIGN IN', '가입한 이메일과 비밀번호로 로그인해요') +
+      '<div class="login-form">' +
+      '<div class="field"><label>이메일</label><input type="email" autocomplete="email" data-auth="email" placeholder="you@example.com" value="' + esc(ui.emailInput) + '"></div>' +
+      '<div class="field"><label>비밀번호</label><input type="password" autocomplete="current-password" data-auth="password" maxlength="128"></div>' +
+      '<div class="login-err" id="auth-err"' + (ui.authErr ? '' : ' hidden') + '>' + esc(ui.authErr) + '</div>' +
+      '<button class="btn btn-pill btn-full" id="login-submit" data-act="login-submit"' + (emailValid() && ui.authPassword && !ui.authBusy ? '' : ' disabled') + '>' + (ui.authBusy ? '로그인 중…' : '로그인') + '</button>' +
+      '<div class="auth-switch">아직 계정이 없나요? <a href="/signup" data-nav>가입하기</a></div>' +
+      '</div>' +
+      '</main>'
+    );
+  }
+
+  function viewSignup() {
+    const ready = ui.authName.trim().length >= 2 && emailValid() && passwordStrong(ui.authPassword) && ui.authPassword === ui.authConfirm && !ui.authBusy;
+    return (
+      '<main class="page page-login">' +
+      sectionTitle('회원가입', 'CREATE ACCOUNT', '안전한 계정을 만들고 여행 계획을 보관하세요') +
+      '<div class="login-form">' +
+      '<div class="field"><label>이름</label><input type="text" autocomplete="name" data-auth="name" maxlength="40" placeholder="홍길동" value="' + esc(ui.authName) + '"></div>' +
+      '<div class="field"><label>이메일</label><input type="email" autocomplete="email" data-auth="email" placeholder="you@example.com" value="' + esc(ui.emailInput) + '"></div>' +
+      '<div class="field"><label>비밀번호</label><input type="password" autocomplete="new-password" data-auth="password" maxlength="128" aria-describedby="password-hint"><span class="field-help" id="password-hint">영문과 숫자를 포함해 10자 이상 입력해 주세요.</span></div>' +
+      '<div class="field"><label>비밀번호 확인</label><input type="password" autocomplete="new-password" data-auth="confirm" maxlength="128"></div>' +
+      '<div class="login-err" id="auth-err"' + (ui.authErr ? '' : ' hidden') + '>' + esc(ui.authErr) + '</div>' +
+      '<button class="btn btn-pill btn-full" id="signup-submit" data-act="signup-submit"' + (ready ? '' : ' disabled') + '>' + (ui.authBusy ? '가입 중…' : '가입하기') + '</button>' +
+      '<div class="auth-switch">이미 계정이 있나요? <a href="/login" data-nav>로그인</a></div>' +
+      '</div>' +
       '</main>'
     );
   }
@@ -559,25 +638,36 @@
     if (ui.adminRegions === null) {
       ui.adminRegions = (visibleRegionIds === null) ? D.REGIONS.map((r) => r.id) : visibleRegionIds.slice();
     }
-    const toggles = D.REGIONS.map((r) => {
-      const on = ui.adminRegions.indexOf(r.id) >= 0;
+    const active = D.REGIONS.filter((r) => ui.adminRegions.indexOf(r.id) >= 0).map((r) => {
       return (
-        '<label class="rv-item' + (on ? ' on' : '') + '">' +
-        '<input type="checkbox" data-region-toggle="' + r.id + '"' + (on ? ' checked' : '') + '>' +
+        '<div class="rv-item on">' +
+        '<span class="rv-state">공개</span>' +
+        '<span class="rv-copy">' +
         '<span class="rv-ko">' + esc(r.ko) + '</span>' +
         '<span class="rv-en">' + esc(r.en) + '</span>' +
-        '</label>'
+        '</span>' +
+        '<button class="rv-action remove" data-act="region-remove" data-region="' + r.id + '"' + (ui.adminRegions.length === 1 ? ' disabled' : '') + '>제거</button>' +
+        '</div>'
       );
     }).join('');
+    const inactive = D.REGIONS.filter((r) => ui.adminRegions.indexOf(r.id) < 0).map((r) => (
+      '<div class="rv-item">' +
+      '<span class="rv-state off">비공개</span>' +
+      '<span class="rv-copy"><span class="rv-ko">' + esc(r.ko) + '</span><span class="rv-en">' + esc(r.en) + '</span></span>' +
+      '<button class="rv-action add" data-act="region-add" data-region="' + r.id + '">추가</button>' +
+      '</div>'
+    )).join('');
     const count = ui.adminRegions.length;
     const hint = count === 0
       ? '최소 한 지역은 선택해야 합니다'
       : (ui.adminRegionsSaved ? '저장되었습니다 ✓ (방문자 화면에는 최대 30초 이내 반영)' : '');
     return (
       '<div class="admin-regions">' +
-      '<div class="ar-title">노출 지역 설정</div>' +
-      '<div class="ar-desc">체크한 지역만 홈과 여행 계획 화면에 노출됩니다. 저장하면 모든 방문자에게 적용됩니다.</div>' +
-      '<div class="rv-grid">' + toggles + '</div>' +
+      '<div class="ar-title">지역 추가·제거</div>' +
+      '<div class="ar-desc">공개 목록에 추가한 지역만 홈과 여행 계획 화면에 표시됩니다. 변경 후 저장해야 방문자에게 적용됩니다.</div>' +
+      '<div class="rv-group"><div class="rv-heading">공개 지역 <b>' + count + '</b></div><div class="rv-grid">' + active + '</div></div>' +
+      '<div class="rv-group"><div class="rv-heading">추가 가능한 지역</div>' +
+      (inactive ? '<div class="rv-grid">' + inactive + '</div>' : '<div class="rv-empty">모든 지역이 공개 목록에 추가되어 있습니다.</div>') + '</div>' +
       '<div class="ad-actions">' +
       '<button class="btn btn-pill" id="save-regions" data-act="save-regions"' + (count === 0 ? ' disabled' : '') + '>노출 지역 저장</button>' +
       '<span class="form-hint" id="rv-hint">' + esc(hint) + '</span>' +
@@ -617,7 +707,7 @@
           '<div class="field"><label>가이드 제목</label><input type="text" data-admin="title" placeholder="예: 도쿄 3박 4일 — 시부야·아사쿠사 중심 코스" value="' + esc(ui.adminTitle) + '"></div>' +
           '<div class="field"><label>일자별 일정</label><textarea rows="10" data-admin="body" placeholder="Day 1 — 나리타 도착, 아사쿠사 센소지…\nDay 2 — 시부야 · 하라주쿠…">' + esc(ui.adminBody) + '</textarea></div>' +
           '<div class="ad-actions">' +
-          '<button class="btn btn-pill" id="register-guide" data-act="register-guide"' + (ui.adminTitle.trim() && ui.adminBody.trim() ? '' : ' disabled') + '>가이드 등록하기</button>' +
+          '<button class="btn btn-pill" id="register-guide" data-act="register-guide"' + (ui.adminTitle.trim() && ui.adminBody.trim() && !ui.adminBusy ? '' : ' disabled') + '>' + (ui.adminBusy ? '등록 중…' : '가이드 등록하기') + '</button>' +
           '<span class="form-hint">등록하면 사용자에게 알림이 갑니다</span>' +
           '</div>' +
           '</div>';
@@ -645,7 +735,10 @@
       '</div>' +
       viewRegionSettings() +
       '<div class="admin-section-title">여행 계획 요청</div>' +
-      (reqs.length === 0
+      (ui.adminErr ? '<div class="login-err">' + esc(ui.adminErr) + '</div>' : '') +
+      (ui.adminBusy && reqs.length === 0
+        ? '<div class="admin-empty">요청 목록을 불러오는 중입니다…</div>'
+        : reqs.length === 0
         ? '<div class="admin-empty">아직 접수된 요청이 없습니다. 사용자가 결제를 완료하면 이곳에 표시됩니다.</div>'
         : '<div class="admin-grid"><div class="admin-list">' + list + '</div>' + detail + '</div>') +
       '</main>'
@@ -671,6 +764,7 @@
       case 'pay': viewEl.innerHTML = viewPay(); break;
       case 'done': viewEl.innerHTML = viewDone(); break;
       case 'login': viewEl.innerHTML = viewLogin(); break;
+      case 'signup': viewEl.innerHTML = viewSignup(); break;
       case 'mypage': viewEl.innerHTML = viewMypage(); break;
       case 'guide': viewEl.innerHTML = viewGuide(route.reqId); break;
       case 'admin': viewEl.innerHTML = viewAdmin(); break;
@@ -690,42 +784,113 @@
     }
   }
 
+  function finishAuth(user) {
+    store.user = user;
+    ui.authPassword = '';
+    ui.authConfirm = '';
+    ui.authErr = '';
+    ui.authBusy = false;
+    const next = ui.afterLogin || '/my';
+    ui.afterLogin = null;
+    loadUserData().catch(() => null).then(() => navigate(next));
+  }
+
+  function submitLogin() {
+    if (!emailValid() || !ui.authPassword || ui.authBusy) return;
+    ui.authBusy = true;
+    ui.authErr = '';
+    render();
+    authRequest('login', { email: ui.emailInput, password: ui.authPassword })
+      .then((data) => finishAuth(data.user))
+      .catch((error) => {
+        ui.authBusy = false;
+        ui.authErr = authErrorMessage(error.message);
+        ui.authPassword = '';
+        render();
+      });
+  }
+
+  function submitSignup() {
+    if (ui.authBusy || ui.authName.trim().length < 2 || !emailValid() || !passwordStrong(ui.authPassword) || ui.authPassword !== ui.authConfirm) return;
+    ui.authBusy = true;
+    ui.authErr = '';
+    render();
+    authRequest('signup', { name: ui.authName.trim(), email: ui.emailInput, password: ui.authPassword })
+      .then((data) => finishAuth(data.user))
+      .catch((error) => {
+        ui.authBusy = false;
+        ui.authErr = authErrorMessage(error.message);
+        ui.authPassword = '';
+        ui.authConfirm = '';
+        render();
+      });
+  }
+
+  function logout() {
+    authRequest('logout', {}).catch(() => null).then(() => {
+      store.user = null;
+      store.requests = [];
+      store.notifications = [];
+      ui.notifOpen = false;
+      navigate('/');
+    });
+  }
+
+  function refreshSession() {
+    return fetch('/api/auth/session', { headers: { Accept: 'application/json' }, credentials: 'same-origin' })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        store.user = data && data.user ? data.user : null;
+        return loadUserData().catch(() => null).then(() => render());
+      })
+      .catch(() => { store.user = null; });
+  }
+
   function doPay() {
-    const id = 'R-' + String(Date.now()).slice(-6);
-    const req = {
-      id,
-      email: store.user.email,
-      sel: ui.sel,
-      form: Object.assign({}, ui.form),
-      status: '가이드 작성 중',
-      guide: null,
-      createdAt: Date.now(),
-    };
-    store.requests = store.requests.concat([req]);
-    S.persist();
-    ui.sel = [];
-    ui.cardNum = ''; ui.cardExp = ''; ui.cardCvc = '';
-    navigate('/plan/done');
+    if (!store.user || ui.requestBusy) return;
+    ui.requestBusy = true;
+    ui.requestErr = '';
+    render();
+    apiRequest('/api/payments/payapp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ sel: ui.sel, form: ui.form, payMethod: ui.payMethod }),
+    }).then((data) => {
+      store.requests = store.requests.concat([data.request]);
+      ui.requestBusy = false;
+      ui.sel = [];
+      location.href = data.payurl;
+    }).catch((error) => {
+      ui.requestBusy = false;
+      ui.requestErr = error.message === 'unauthorized' ? '로그인이 만료되었습니다. 다시 로그인해 주세요.' : '결제창을 열지 못했습니다. 연락처와 결제 정보를 확인해 주세요.';
+      if (error.message === 'unauthorized') { store.user = null; ui.afterLogin = '/plan/pay'; navigate('/login'); }
+      else render();
+    });
   }
 
   function registerGuide() {
     const aq = store.requests.find((q) => q.id === ui.adminSel);
-    if (!aq || aq.guide) return;
+    if (!aq || aq.guide || ui.adminBusy) return;
     const guide = { title: ui.adminTitle.trim(), body: ui.adminBody.trim(), registeredAt: Date.now() };
     if (!guide.title || !guide.body) return;
-    store.requests = store.requests.map((q) => (q.id === aq.id ? Object.assign({}, q, { guide, status: '가이드 도착' }) : q));
-    store.notifications = store.notifications.concat([{
-      id: 'N-' + Date.now(),
-      email: aq.email,
-      reqId: aq.id,
-      text: "요청하신 여행 가이드 '" + guide.title + "'가 도착했습니다. 지금 확인해 보세요.",
-      read: false,
-      ts: Date.now(),
-    }]);
-    S.persist();
-    ui.adminTitle = '';
-    ui.adminBody = '';
+    ui.adminBusy = true;
+    ui.adminErr = '';
     render();
+    apiRequest('/api/admin/requests/' + encodeURIComponent(aq.id) + '/guide', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ title: guide.title, body: guide.body }),
+    }).then((data) => {
+      store.requests = store.requests.map((q) => (q.id === aq.id ? Object.assign({}, q, { guide: data.guide, status: '가이드 도착' }) : q));
+      ui.adminTitle = '';
+      ui.adminBody = '';
+      ui.adminBusy = false;
+      render();
+    }).catch(() => {
+      ui.adminBusy = false;
+      ui.adminErr = '가이드 등록에 실패했습니다. 다시 시도해 주세요.';
+      render();
+    });
   }
 
   // ===== Shared region-visibility config (KV via /api/regions) =====
@@ -805,16 +970,13 @@
         const n = store.notifications.find((m) => m.id === id);
         if (!n) break;
         store.notifications = store.notifications.map((m) => (m.id === id ? Object.assign({}, m, { read: true }) : m));
-        S.persist();
+        apiRequest('/api/notifications/' + encodeURIComponent(id), { method: 'PUT' }).catch(() => null);
         ui.notifOpen = false;
         navigate('/guide/' + n.reqId);
         break;
       }
       case 'logout':
-        store.user = null;
-        S.persist();
-        ui.notifOpen = false;
-        navigate('/');
+        logout();
         break;
       case 'go-my': navigate('/my'); break;
       case 'go-plan-tokyo': ui.region = 'tokyo'; navigate('/plan'); break;
@@ -836,38 +998,17 @@
       }
       case 'go-info': if (ui.sel.length > 0) navigate('/plan/info'); break;
       case 'go-pay':
-        if (!ui.form.date) break;
+        if (phoneIncomplete() || !ui.form.date) break;
         if (!store.user) { ui.afterLogin = '/plan/pay'; resetLogin(); navigate('/login'); }
         else navigate('/plan/pay');
         break;
       case 'pick-method': ui.payMethod = el.getAttribute('data-method'); render(); break;
       case 'do-pay':
-        if (ui.payMethod === 'card' && cardIncomplete()) break;
+        if (phoneIncomplete()) break;
         doPay();
         break;
-      case 'send-code':
-        if (!emailValid()) break;
-        ui.demoCode = String(Math.floor(100000 + Math.random() * 900000));
-        ui.loginStep = 'code';
-        ui.codeInput = '';
-        ui.loginErr = '';
-        render();
-        break;
-      case 'verify-code': {
-        if (ui.codeInput !== ui.demoCode) {
-          ui.loginErr = '인증번호가 일치하지 않습니다. 다시 확인해 주세요.';
-          const err = document.getElementById('login-err');
-          if (err) { err.hidden = false; err.textContent = ui.loginErr; }
-          break;
-        }
-        store.user = { email: ui.emailInput };
-        S.persist();
-        const next = ui.afterLogin || '/my';
-        ui.afterLogin = null;
-        navigate(next);
-        break;
-      }
-      case 'back-to-email': resetLogin(); render(); break;
+      case 'login-submit': submitLogin(); break;
+      case 'signup-submit': submitSignup(); break;
       case 'admin-open':
         ui.adminSel = el.getAttribute('data-id');
         ui.adminTitle = '';
@@ -876,19 +1017,21 @@
         break;
       case 'register-guide': registerGuide(); break;
       case 'save-regions': saveRegions(); break;
+      case 'region-add': {
+        const id = el.getAttribute('data-region');
+        if (D.REGIONS.some((r) => r.id === id) && ui.adminRegions.indexOf(id) < 0) ui.adminRegions = ui.adminRegions.concat([id]);
+        ui.adminRegionsSaved = false;
+        render();
+        break;
+      }
+      case 'region-remove': {
+        const id = el.getAttribute('data-region');
+        if (ui.adminRegions.length > 1) ui.adminRegions = ui.adminRegions.filter((item) => item !== id);
+        ui.adminRegionsSaved = false;
+        render();
+        break;
+      }
     }
-  });
-
-  document.addEventListener('change', (e) => {
-    const rt = e.target.closest('[data-region-toggle]');
-    if (!rt) return;
-    const id = rt.getAttribute('data-region-toggle');
-    if (ui.adminRegions === null) ui.adminRegions = [];
-    const idx = ui.adminRegions.indexOf(id);
-    if (idx >= 0) ui.adminRegions = ui.adminRegions.filter((x) => x !== id);
-    else ui.adminRegions = ui.adminRegions.concat([id]);
-    ui.adminRegionsSaved = false;
-    render();
   });
 
   // --- live input handling (no full re-render → keeps focus/caret) ---
@@ -899,43 +1042,27 @@
       ui.form[t.getAttribute('data-form')] = t.value;
       const next = document.getElementById('info-next');
       const hint = document.getElementById('info-hint');
-      if (next) next.disabled = !ui.form.date;
-      if (hint) hint.textContent = ui.form.date ? '' : '입국 날짜를 선택하면 다음으로 넘어갈 수 있어요';
-      return;
-    }
-
-    if (t.matches('[data-card]')) {
-      const kind = t.getAttribute('data-card');
-      if (kind === 'num') {
-        ui.cardNum = t.value.replace(/\D/g, '').slice(0, 16).replace(/(\d{4})(?=\d)/g, '$1 ');
-        t.value = ui.cardNum;
-      } else if (kind === 'exp') {
-        const d = t.value.replace(/\D/g, '').slice(0, 4);
-        ui.cardExp = d.length > 2 ? d.slice(0, 2) + '/' + d.slice(2) : d;
-        t.value = ui.cardExp;
-      } else if (kind === 'cvc') {
-        ui.cardCvc = t.value.replace(/\D/g, '').slice(0, 3);
-        t.value = ui.cardCvc;
-      }
+      const incomplete = phoneIncomplete() || !ui.form.date;
+      if (next) next.disabled = incomplete;
+      if (hint) hint.textContent = incomplete ? '연락처와 입국 날짜를 입력하면 다음으로 넘어갈 수 있어요' : '';
       const payBtn = document.getElementById('pay-btn');
-      if (payBtn) payBtn.disabled = ui.payMethod === 'card' && cardIncomplete();
+      if (payBtn) payBtn.disabled = phoneIncomplete();
       return;
     }
 
-    if (t.matches('[data-login]')) {
-      if (t.getAttribute('data-login') === 'email') {
-        ui.emailInput = t.value;
-        const btn = document.getElementById('send-code');
-        if (btn) btn.disabled = !emailValid();
-      } else {
-        ui.codeInput = t.value.replace(/\D/g, '').slice(0, 6);
-        t.value = ui.codeInput;
-        ui.loginErr = '';
-        const err = document.getElementById('login-err');
-        if (err) err.hidden = true;
-        const btn = document.getElementById('verify-code');
-        if (btn) btn.disabled = ui.codeInput.length !== 6;
-      }
+    if (t.matches('[data-auth]')) {
+      const field = t.getAttribute('data-auth');
+      if (field === 'email') ui.emailInput = t.value.trimStart();
+      else if (field === 'name') ui.authName = t.value;
+      else if (field === 'password') ui.authPassword = t.value;
+      else if (field === 'confirm') ui.authConfirm = t.value;
+      ui.authErr = '';
+      const err = document.getElementById('auth-err');
+      if (err) err.hidden = true;
+      const loginBtn = document.getElementById('login-submit');
+      if (loginBtn) loginBtn.disabled = !emailValid() || !ui.authPassword || ui.authBusy;
+      const signupBtn = document.getElementById('signup-submit');
+      if (signupBtn) signupBtn.disabled = ui.authName.trim().length < 2 || !emailValid() || !passwordStrong(ui.authPassword) || ui.authPassword !== ui.authConfirm || ui.authBusy;
       return;
     }
 
@@ -943,12 +1070,14 @@
       if (t.getAttribute('data-admin') === 'title') ui.adminTitle = t.value;
       else ui.adminBody = t.value;
       const btn = document.getElementById('register-guide');
-      if (btn) btn.disabled = !ui.adminTitle.trim() || !ui.adminBody.trim();
+      if (btn) btn.disabled = !ui.adminTitle.trim() || !ui.adminBody.trim() || ui.adminBusy;
     }
   });
 
   // ===== Boot =====
   S.load();
   render();
+  if (IS_ADMIN_HOST) loadAdminRequests();
+  else refreshSession();
   fetchRegionConfig();
 })();

@@ -79,7 +79,7 @@
     { id: 'card', ko: '신용·체크카드', en: 'CARD' },
     { id: 'kakao', ko: '카카오페이', en: 'KAKAO PAY' },
     { id: 'naver', ko: '네이버페이', en: 'NAVER PAY' },
-    { id: 'toss', ko: '토스페이', en: 'TOSS PAY' },
+    { id: 'payco', ko: '페이코', en: 'PAYCO' },
   ];
 
   const FORM_OPTIONS = {

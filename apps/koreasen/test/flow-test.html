@@ -54,81 +54,37 @@
     // 3. info step
     click('[data-act="go-info"]');
     check('info route', location.pathname === '/plan/info');
-    check('next disabled without date', document.getElementById('info-next').disabled === true);
+    check('next disabled without phone/date', document.getElementById('info-next').disabled === true);
+    input('[data-form="phone"]', '01012345678');
     input('[data-form="date"]', '2026-08-15');
-    check('next enabled with date', document.getElementById('info-next').disabled === false);
+    check('next enabled with phone/date', document.getElementById('info-next').disabled === false);
     input('[data-form="lodging"]', '신주쿠 인근');
     input('[data-form="notes"]', '아이 동반, 라멘 투어 희망');
 
-    // 4. pay requires login → redirected to /login
+    // 4. pay requires login; signup and login entry points exist
     click('[data-act="go-pay"]');
     check('redirect to login', location.pathname === '/login');
-    input('[data-login="email"]', 'tester@example.com');
-    check('send enabled', document.getElementById('send-code').disabled === false);
-    click('[data-act="send-code"]');
-    const code = document.querySelector('.demo-code b').textContent.trim();
-    check('demo code 6 digits', /^\d{6}$/.test(code));
-    input('[data-login="code"]', '000000');
-    click('[data-act="verify-code"]');
-    check('wrong code error shown', document.getElementById('login-err').hidden === false);
-    input('[data-login="code"]', code);
-    click('[data-act="verify-code"]');
-    check('back to pay after login', location.pathname === '/plan/pay');
+    check('password login form', !!document.querySelector('[data-auth="password"]'));
+    click('a[href="/signup"][data-nav]');
+    check('signup route', location.pathname === '/signup');
+    check('signup four fields', document.querySelectorAll('[data-auth]').length === 4);
 
-    // 5. payment
+    // Functions authentication is covered by test/auth-test.mjs. Seed only the
+    // in-memory user here so the remaining static UI flow can be exercised.
+    window.MTM_STORE.store.user = { email: 'tester@example.com', name: '테스터' };
+    history.replaceState({}, '', '/plan/pay');
+    dispatchEvent(new PopStateEvent('popstate'));
+    check('authenticated pay route', location.pathname === '/plan/pay');
+
+    // 5. payment form UI (D1 submission is covered by API integration tests)
     check('summary has spots', document.querySelector('.ps-row span:last-child').textContent.indexOf('시부야') >= 0);
-    check('pay disabled (card empty)', document.getElementById('pay-btn').disabled === true);
-    input('[data-card="num"]', '4111111111111111');
-    check('card formatted', document.querySelector('[data-card="num"]').value === '4111 1111 1111 1111');
-    input('[data-card="exp"]', '1227');
-    check('exp formatted', document.querySelector('[data-card="exp"]').value === '12/27');
-    input('[data-card="cvc"]', '123');
-    check('pay enabled', document.getElementById('pay-btn').disabled === false);
+    check('pay enabled with phone', document.getElementById('pay-btn').disabled === false);
     click('[data-act="pick-method"][data-method="kakao"]');
-    check('easy note shown', !!document.querySelector('.easy-note'));
+    check('payapp note shown', document.querySelector('.easy-note').textContent.indexOf('페이앱') >= 0);
     click('[data-act="pick-method"][data-method="card"]');
-    check('card fields kept', document.querySelector('[data-card="num"]').value === '4111 1111 1111 1111');
-    click('[data-act="do-pay"]');
-    check('done route', location.pathname === '/plan/done');
-    check('RECEIVED shown', document.querySelector('.dn-en').textContent === 'RECEIVED');
-
-    // 6. mypage shows request in progress
-    click('a[data-nav-my]');
-    check('mypage route', location.pathname === '/my');
-    check('request card', document.querySelectorAll('.req-card').length === 1);
-    check('status writing', document.querySelector('.status-badge').textContent === '가이드 작성 중');
-
-    // 7. admin registers a guide
-    click('[data-act="go-admin"]');
-    check('admin route', location.pathname === '/admin');
-    click('.admin-req');
-    input('[data-admin="title"]', '도쿄 3박 4일 코스');
-    input('[data-admin="body"]', 'Day 1 — 시부야\nDay 2 — 아사쿠사');
-    check('register enabled', document.getElementById('register-guide').disabled === false);
-    click('[data-act="register-guide"]');
-    check('guide saved (read-only view)', !!document.querySelector('.ad-guide-done'));
-
-    // 8. notification badge + open guide
-    check('unread badge = 1', document.querySelector('.notif-badge').textContent === '1');
-    click('[data-act="toggle-notif"]');
-    check('notif panel open', !!document.querySelector('.notif-panel'));
-    click('.notif-item');
-    check('guide route', /^\/guide\/R-\d{6}$/.test(location.pathname));
-    check('guide title', document.querySelector('.section-title .st-ko').textContent === '도쿄 3박 4일 코스');
-    check('guide body pre-wrap', document.querySelector('.guide-body').textContent.indexOf('Day 2') >= 0);
-    check('badge cleared', !document.querySelector('.notif-badge'));
-
-    // 9. mypage now shows arrived + persistence survives reload of store
-    click('[data-act="go-my"]');
-    check('status arrived', document.querySelector('.status-badge').textContent === '가이드 도착');
-    check('guide button', !!document.querySelector('a.btn-square'));
-    const saved = JSON.parse(localStorage.getItem('mtm_proto_v1'));
-    check('persisted request+guide', saved.requests.length === 1 && !!saved.requests[0].guide);
-    check('persisted user', saved.user.email === 'tester@example.com');
-
-    // 10. logout
-    click('[data-act="logout"]');
-    check('logged out home', location.pathname === '/' && !!document.querySelector('a[href="/login"]'));
+    check('card data not collected locally', !document.querySelector('[data-card="num"]'));
+    check('D1 submit action present', document.getElementById('pay-btn').getAttribute('data-act') === 'do-pay');
+    check('no local prototype store', !localStorage.getItem('mtm_proto_v1'));
   } catch (e) {
     results.push('FAIL exception: ' + (e && e.message));
   }

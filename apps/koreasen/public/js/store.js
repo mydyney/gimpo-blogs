@@ -1,6 +1,5 @@
 // mytokyomate — persisted store (user / requests / notifications) + shared formatters.
-// Prototype parity: everything lives in localStorage under mtm_proto_v1.
-// Production TODO: replace with a real backend (Cloudflare D1/KV + email OTP + PG).
+// In-memory client cache. Durable data lives behind authenticated D1 APIs.
 (function (global) {
   'use strict';
 
@@ -13,25 +12,12 @@
   };
 
   function load() {
-    try {
-      const saved = JSON.parse(localStorage.getItem(D.LS_KEY) || 'null');
-      if (saved) {
-        store.user = saved.user || null;
-        store.requests = saved.requests || [];
-        store.notifications = saved.notifications || [];
-      }
-    } catch (e) { /* corrupted storage — start fresh */ }
+    store.user = null;
+    store.requests = [];
+    store.notifications = [];
   }
 
-  function persist() {
-    try {
-      localStorage.setItem(D.LS_KEY, JSON.stringify({
-        user: store.user,
-        requests: store.requests,
-        notifications: store.notifications,
-      }));
-    } catch (e) { /* storage unavailable — session-only */ }
-  }
+  function persist() { /* compatibility no-op: D1 APIs own persistence */ }
 
   function spotName(regionId, spotId) {
     const sp = (D.SPOTS[regionId] || []).find((s) => s.id === spotId);
@@ -45,6 +31,7 @@
   function metaLabel(form) {
     return [
       form.count + ' (' + form.group + ')',
+      form.phone ? '연락처 ' + form.phone : null,
       '입국 ' + (form.date || '미정'),
       form.duration,
       '예산 ' + form.budget,
