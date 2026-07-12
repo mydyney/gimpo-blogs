@@ -1,5 +1,5 @@
 const SPOTS = {
-  tokyo: ['shibuya', 'shinjuku', 'asakusa', 'ginza', 'harajuku', 'ueno', 'odaiba', 'skytree', 'tsukiji', 'kichijoji', 'disney', 'roppongi'],
+  tokyo: ['shibuya', 'shinjuku', 'asakusa', 'ginza', 'harajuku', 'ueno', 'odaiba', 'skytree', 'tsukiji', 'kichijoji', 'tokyodome', 'disney', 'roppongi'],
   kanto: ['yokohama', 'kamakura', 'hakone', 'nikko'],
   kansai: ['dotonbori', 'osakajo', 'fushimi', 'kiyomizu', 'arashiyama', 'nara'],
   kyushu: ['canalcity', 'dazaifu', 'yufuin', 'beppu'],
