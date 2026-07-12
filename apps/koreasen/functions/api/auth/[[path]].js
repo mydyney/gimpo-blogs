@@ -1,23 +1,43 @@
 import { json, sameOrigin, readJson, cleanText } from '../../_lib/http.js';
 import {
-  PBKDF2_ITERATIONS, normalizeEmail, validEmail, validPassword,
-  bytesToBase64Url, base64UrlToBytes, sha256, hashPassword, safeEqual,
-  createSession, getSession, sessionCookie,
+  normalizeEmail, validEmail, sha256, safeEqual, createSession, getSession, sessionCookie,
 } from '../../_lib/auth.js';
 
-const LOGIN_WINDOW_MS = 15 * 60 * 1000;
-const MAX_FAILURES = 5;
+const CODE_TTL_MS = 10 * 60 * 1000;
+const RESEND_WAIT_MS = 60 * 1000;
+const MAX_ATTEMPTS = 5;
 
-async function rateKey(request, email) {
-  const ip = request.headers.get('CF-Connecting-IP') || 'local';
-  return sha256(ip + '|' + email);
+function validPurpose(value) {
+  return value === 'login' || value === 'signup';
 }
 
-async function registerFailure(db, key, current) {
-  const expiresAt = Date.now() + LOGIN_WINDOW_MS;
-  await db.prepare(
-    'INSERT INTO login_attempts (attempt_key, failures, expires_at) VALUES (?, ?, ?) ON CONFLICT(attempt_key) DO UPDATE SET failures = excluded.failures, expires_at = excluded.expires_at'
-  ).bind(key, current + 1, expiresAt).run();
+function randomCode() {
+  const bytes = crypto.getRandomValues(new Uint8Array(4));
+  const number = new DataView(bytes.buffer).getUint32(0) % 1000000;
+  return String(number).padStart(6, '0');
+}
+
+async function codeHash(id, code, secret) {
+  return sha256(id + '|' + code + '|' + secret);
+}
+
+async function sendCode(env, email, code) {
+  if (!env.RESEND_API_KEY || !env.AUTH_FROM_EMAIL) throw new Error('email_not_configured');
+  const response = await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      Authorization: 'Bearer ' + env.RESEND_API_KEY,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      from: env.AUTH_FROM_EMAIL,
+      to: [email],
+      subject: '[mytokyomate] 이메일 인증번호',
+      text: '인증번호는 ' + code + '입니다. 10분 안에 입력해 주세요. 본인이 요청하지 않았다면 이 메일을 무시해 주세요.',
+      html: '<div style="font-family:sans-serif;line-height:1.7"><h2>mytokyomate 이메일 인증</h2><p>아래 인증번호를 10분 안에 입력해 주세요.</p><p style="font-size:30px;font-weight:800;letter-spacing:8px">' + code + '</p><p style="color:#667">본인이 요청하지 않았다면 이 메일을 무시해 주세요.</p></div>',
+    }),
+  });
+  if (!response.ok) throw new Error('resend_failed');
 }
 
 export async function onRequest(context) {
@@ -33,7 +53,6 @@ export async function onRequest(context) {
   if (request.method !== 'POST' || !sameOrigin(request)) {
     return json({ ok: false, error: request.method === 'POST' ? 'forbidden' : 'method_not_allowed' }, { status: request.method === 'POST' ? 403 : 405 });
   }
-
   if (action === 'logout') {
     const session = await getSession(request, db);
     if (session) await db.prepare('DELETE FROM sessions WHERE token_hash = ?').bind(session.tokenHash).run();
@@ -45,53 +64,68 @@ export async function onRequest(context) {
     return json({ ok: false, error: 'invalid_request' }, { status: 400 });
   }
   const email = normalizeEmail(data.email);
+  const purpose = String(data.purpose || '');
   if (!validEmail(email)) return json({ ok: false, error: 'invalid_email' }, { status: 400 });
+  if (!validPurpose(purpose)) return json({ ok: false, error: 'invalid_request' }, { status: 400 });
 
-  if (action === 'signup') {
-    const name = cleanText(data.name, 40);
-    if (name.length < 2) return json({ ok: false, error: 'invalid_name' }, { status: 400 });
-    if (!validPassword(data.password)) return json({ ok: false, error: 'weak_password' }, { status: 400 });
-    if (await db.prepare('SELECT id FROM users WHERE email = ?').bind(email).first()) {
-      return json({ ok: false, error: 'account_exists' }, { status: 409 });
+  const existing = await db.prepare('SELECT id, email, name FROM users WHERE email = ?').bind(email).first();
+
+  if (action === 'request-code') {
+    const name = purpose === 'signup' ? cleanText(data.name, 40) : '';
+    if (purpose === 'signup' && name.length < 2) return json({ ok: false, error: 'invalid_name' }, { status: 400 });
+    if (purpose === 'signup' && existing) return json({ ok: false, error: 'account_exists' }, { status: 409 });
+
+    const latest = await db.prepare('SELECT created_at FROM email_auth_codes WHERE email = ? AND purpose = ? ORDER BY created_at DESC LIMIT 1').bind(email, purpose).first();
+    if (latest && Number(latest.created_at) > Date.now() - RESEND_WAIT_MS) {
+      return json({ ok: false, error: 'code_rate_limited' }, { status: 429 });
     }
-    const salt = crypto.getRandomValues(new Uint8Array(16));
-    const passwordHash = await hashPassword(data.password, salt);
-    const user = { id: crypto.randomUUID(), email, name };
+
+    // Login requests use the same work and response even for unknown addresses,
+    // preventing account discovery through response content or timing.
+    if (!env.AUTH_CODE_SECRET) return json({ ok: false, error: 'auth_unavailable' }, { status: 503 });
+
+    const id = crypto.randomUUID();
+    const code = randomCode();
+    const now = Date.now();
+    await db.prepare('DELETE FROM email_auth_codes WHERE expires_at <= ? OR (email = ? AND purpose = ?)').bind(now, email, purpose).run();
+    await db.prepare('INSERT INTO email_auth_codes (id, email, purpose, name, code_hash, attempts, created_at, expires_at) VALUES (?, ?, ?, ?, ?, 0, ?, ?)')
+      .bind(id, email, purpose, name || null, await codeHash(id, code, env.AUTH_CODE_SECRET), now, now + CODE_TTL_MS).run();
     try {
-      await db.prepare(
-        'INSERT INTO users (id, email, name, password_hash, password_salt, password_iterations, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
-      ).bind(user.id, email, name, passwordHash, bytesToBase64Url(salt), PBKDF2_ITERATIONS, Date.now()).run();
+      await sendCode(env, email, code);
     } catch (error) {
-      return json({ ok: false, error: 'account_exists' }, { status: 409 });
+      await db.prepare('DELETE FROM email_auth_codes WHERE id = ?').bind(id).run();
+      return json({ ok: false, error: 'email_send_failed' }, { status: 502 });
     }
-    const session = await createSession(request, db, user);
-    return json({ ok: true, user: { email, name } }, { status: 201, headers: { 'Set-Cookie': session.cookie } });
+    return json({ ok: true });
   }
 
-  if (action === 'login') {
-    if (typeof data.password !== 'string' || data.password.length > 128) return json({ ok: false, error: 'invalid_credentials' }, { status: 401 });
-    const attemptKey = await rateKey(request, email);
-    const attempt = await db.prepare('SELECT failures, expires_at FROM login_attempts WHERE attempt_key = ?').bind(attemptKey).first();
-    const failures = attempt && attempt.expires_at > Date.now() ? Number(attempt.failures) : 0;
-    if (failures >= MAX_FAILURES) return json({ ok: false, error: 'too_many_attempts' }, { status: 429 });
-    const user = await db.prepare(
-      'SELECT id, email, name, password_hash, password_salt, password_iterations FROM users WHERE email = ?'
-    ).bind(email).first();
-    let valid = false;
-    if (user) {
-      const candidate = await hashPassword(data.password, base64UrlToBytes(user.password_salt), Number(user.password_iterations));
-      valid = safeEqual(candidate, user.password_hash);
-    } else {
-      await hashPassword(data.password || 'invalid-password', crypto.getRandomValues(new Uint8Array(16)));
+  if (action === 'verify-code') {
+    const code = String(data.code || '');
+    if (!/^\d{6}$/.test(code) || !env.AUTH_CODE_SECRET) return json({ ok: false, error: 'invalid_code' }, { status: 400 });
+    const row = await db.prepare('SELECT id, name, code_hash, attempts, expires_at FROM email_auth_codes WHERE email = ? AND purpose = ? ORDER BY created_at DESC LIMIT 1').bind(email, purpose).first();
+    if (!row || Number(row.expires_at) <= Date.now() || Number(row.attempts) >= MAX_ATTEMPTS) {
+      return json({ ok: false, error: 'invalid_code' }, { status: 401 });
     }
+    const valid = safeEqual(await codeHash(row.id, code, env.AUTH_CODE_SECRET), row.code_hash);
     if (!valid) {
-      await registerFailure(db, attemptKey, failures);
-      return json({ ok: false, error: 'invalid_credentials' }, { status: 401 });
+      await db.prepare('UPDATE email_auth_codes SET attempts = attempts + 1 WHERE id = ?').bind(row.id).run();
+      return json({ ok: false, error: 'invalid_code' }, { status: 401 });
     }
-    await db.prepare('DELETE FROM login_attempts WHERE attempt_key = ?').bind(attemptKey).run();
+
+    let user = existing;
+    if (purpose === 'signup') {
+      if (existing) return json({ ok: false, error: 'account_exists' }, { status: 409 });
+      user = { id: crypto.randomUUID(), email, name: row.name };
+      await db.prepare('INSERT INTO users (id, email, name, password_hash, password_salt, password_iterations, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)')
+        .bind(user.id, email, user.name, 'email-code-only', '', 0, Date.now()).run();
+    } else if (!user) {
+      return json({ ok: false, error: 'invalid_code' }, { status: 401 });
+    }
+
+    await db.prepare('DELETE FROM email_auth_codes WHERE email = ?').bind(email).run();
     await db.prepare('DELETE FROM sessions WHERE expires_at <= ?').bind(Date.now()).run();
     const session = await createSession(request, db, user);
-    return json({ ok: true, user: { email: user.email, name: user.name } }, { headers: { 'Set-Cookie': session.cookie } });
+    return json({ ok: true, user: { email: user.email, name: user.name } }, { status: purpose === 'signup' ? 201 : 200, headers: { 'Set-Cookie': session.cookie } });
   }
 
   return json({ ok: false, error: 'not_found' }, { status: 404 });

@@ -29,7 +29,7 @@
     sel: [],                                   // [{regionId, spotId}]
     form: { count: '2명', group: '커플 · 부부', phone: '', date: '', duration: '3박 4일', budget: '100~200만원', lodging: '', notes: '' },
     payMethod: 'card',
-    emailInput: '', authName: '', authPassword: '', authConfirm: '', authErr: '', authBusy: false, afterLogin: null,
+    emailInput: '', authName: '', authCode: '', authStep: 'email', authPurpose: '', authErr: '', authBusy: false, afterLogin: null,
     requestBusy: false, requestErr: '', adminBusy: false, adminErr: '',
     notifOpen: false,
     adminSel: null, adminTitle: '', adminBody: '',
@@ -102,8 +102,9 @@
   }
 
   function resetLogin() {
-    ui.authPassword = '';
-    ui.authConfirm = '';
+    ui.authCode = '';
+    ui.authStep = 'email';
+    ui.authPurpose = '';
     ui.authErr = '';
     ui.authBusy = false;
   }
@@ -281,9 +282,6 @@
     );
   }
 
-  const JP_MAP_SVG =
-    '<img src="/images/japan-regions.svg" alt="홋카이도부터 오키나와까지 실제 지형 비율을 반영한 일본 지도">';
-
   function viewPlanner() {
     // Keep the active region within the visible set.
     if (!isRegionVisible(ui.region)) {
@@ -292,19 +290,20 @@
     }
     const activeRegion = D.REGIONS.find((r) => r.id === ui.region) || visibleRegions()[0] || D.REGIONS[0];
 
-    const markers = D.MAP_MARKERS.filter((m) => isRegionVisible(m.regionId)).map((marker) => {
+    const markers = (D.SPOTS[activeRegion.id] || []).filter((spot) => spot.mapPos).map((spot) => ({
+      id: spot.id, regionId: activeRegion.id, label: spot.mapLabel || spot.ko, pos: spot.mapPos,
+    })).map((marker) => {
       const active = ui.region === marker.regionId;
-      const cnt = ui.sel.filter((x) => x.regionId === marker.regionId).length;
+      const picked = ui.sel.some((x) => x.regionId === marker.regionId && x.spotId === marker.id);
       const pos = marker.pos;
-      const labelOffset = marker.labelOffset || [12, 0];
       return (
-        '<button class="map-marker ' + marker.kind + (active ? ' active' : '') + (cnt > 0 ? ' picked' : '') + '"' +
-        ' style="left:' + pos[0] + '%;top:' + pos[1] + '%;--label-x:' + labelOffset[0] + 'px;--label-y:' + labelOffset[1] + 'px"' +
-        ' data-act="pick-region" data-region="' + marker.regionId + '" aria-label="' + esc(marker.label) + ' 지역 선택">' +
-        '<span class="dot"></span><span class="lbl">' + esc(marker.label) + '</span>' +
-        '</button>'
+        '<g class="map-marker place' + (active ? ' active' : '') + (picked ? ' picked' : '') + '" transform="translate(' + pos[0] + ' ' + pos[1] + ')"' +
+        ' data-act="map-spot" data-region="' + marker.regionId + '" data-spot="' + marker.id + '" role="button" tabindex="0" aria-label="' + esc(marker.label) + ' 선택">' +
+        '<circle class="dot" r="1.35"></circle><text class="lbl" x="2.2" y=".9">' + esc(marker.label) + '</text>' +
+        '</g>'
       );
     }).join('');
+    const markerLayer = '<svg class="map-overlay" viewBox="0 0 100 100" aria-label="관광지 위치">' + markers + '</svg>';
 
     const tiles = visibleRegions().map((r) => {
       const active = ui.region === r.id;
@@ -347,7 +346,7 @@
       sectionTitle('여행 계획 요청 · 1단계', 'PICK YOUR SPOTS', '지역을 고른 뒤, 가고 싶은 관광지를 선택해 주세요') +
       '<div class="planner-grid">' +
       '<div class="region-rail">' +
-      '<div class="jp-map">' + JP_MAP_SVG + markers + '</div>' +
+      '<div class="jp-map tokyo-map"><img src="' + esc(activeRegion.map || '/images/japan-regions.svg') + '" alt="' + esc(activeRegion.ko) + ' 상세 지도">' + markerLayer + '</div>' +
       tiles +
       '</div>' +
       '<div>' +
@@ -484,18 +483,15 @@
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ui.emailInput);
   }
 
-  function passwordStrong(value) {
-    return value.length >= 10 && value.length <= 128 && /[A-Za-z]/.test(value) && /\d/.test(value);
-  }
-
   function authErrorMessage(code) {
     const messages = {
-      invalid_credentials: '이메일 또는 비밀번호를 확인해 주세요.',
-      too_many_attempts: '로그인 시도가 너무 많습니다. 15분 후 다시 시도해 주세요.',
+      invalid_code: '인증번호가 올바르지 않거나 만료되었습니다.',
+      too_many_attempts: '인증 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요.',
+      code_rate_limited: '인증번호를 이미 보냈습니다. 1분 후 다시 요청해 주세요.',
       account_exists: '이미 가입된 이메일입니다. 로그인해 주세요.',
       invalid_email: '올바른 이메일 주소를 입력해 주세요.',
       invalid_name: '이름은 2자 이상 40자 이하로 입력해 주세요.',
-      weak_password: '비밀번호는 영문과 숫자를 포함해 10자 이상이어야 합니다.',
+      email_send_failed: '인증 메일을 보내지 못했습니다. 잠시 후 다시 시도해 주세요.',
       auth_unavailable: '인증 서비스를 잠시 사용할 수 없습니다.',
     };
     return messages[code] || '요청을 처리하지 못했습니다. 잠시 후 다시 시도해 주세요.';
@@ -547,14 +543,16 @@
   }
 
   function viewLogin() {
+    const codeStep = ui.authStep === 'code' && ui.authPurpose === 'login';
     return (
       '<main class="page page-login">' +
-      sectionTitle('로그인', 'SIGN IN', '가입한 이메일과 비밀번호로 로그인해요') +
+      sectionTitle('로그인', 'SIGN IN', codeStep ? '메일로 받은 6자리 인증번호를 입력해 주세요' : '가입한 이메일로 인증번호를 받아 로그인해요') +
       '<div class="login-form">' +
-      '<div class="field"><label>이메일</label><input type="email" autocomplete="email" data-auth="email" placeholder="you@example.com" value="' + esc(ui.emailInput) + '"></div>' +
-      '<div class="field"><label>비밀번호</label><input type="password" autocomplete="current-password" data-auth="password" maxlength="128"></div>' +
+      '<div class="field"><label>이메일</label><input type="email" autocomplete="email" data-auth="email" placeholder="you@example.com" value="' + esc(ui.emailInput) + '"' + (codeStep ? ' readonly' : '') + '></div>' +
+      (codeStep ? '<div class="field"><label>인증번호</label><input class="auth-code" type="text" inputmode="numeric" autocomplete="one-time-code" data-auth="code" maxlength="6" placeholder="000000" value="' + esc(ui.authCode) + '"><span class="field-help">인증번호는 10분 동안 유효합니다.</span></div>' : '') +
       '<div class="login-err" id="auth-err"' + (ui.authErr ? '' : ' hidden') + '>' + esc(ui.authErr) + '</div>' +
-      '<button class="btn btn-pill btn-full" id="login-submit" data-act="login-submit"' + (emailValid() && ui.authPassword && !ui.authBusy ? '' : ' disabled') + '>' + (ui.authBusy ? '로그인 중…' : '로그인') + '</button>' +
+      '<button class="btn btn-pill btn-full" id="login-submit" data-act="login-submit"' + ((codeStep ? /^\d{6}$/.test(ui.authCode) : emailValid()) && !ui.authBusy ? '' : ' disabled') + '>' + (ui.authBusy ? '처리 중…' : (codeStep ? '인증하고 로그인' : '인증번호 받기')) + '</button>' +
+      (codeStep ? '<button class="auth-back" data-act="auth-back">이메일 다시 입력</button>' : '') +
       '<div class="auth-switch">아직 계정이 없나요? <a href="/signup" data-nav>가입하기</a></div>' +
       '</div>' +
       '</main>'
@@ -562,17 +560,18 @@
   }
 
   function viewSignup() {
-    const ready = ui.authName.trim().length >= 2 && emailValid() && passwordStrong(ui.authPassword) && ui.authPassword === ui.authConfirm && !ui.authBusy;
+    const codeStep = ui.authStep === 'code' && ui.authPurpose === 'signup';
+    const ready = codeStep ? /^\d{6}$/.test(ui.authCode) : ui.authName.trim().length >= 2 && emailValid();
     return (
       '<main class="page page-login">' +
-      sectionTitle('회원가입', 'CREATE ACCOUNT', '안전한 계정을 만들고 여행 계획을 보관하세요') +
+      sectionTitle('회원가입', 'CREATE ACCOUNT', codeStep ? '메일로 받은 6자리 인증번호를 입력해 주세요' : '이메일 인증만으로 간편하게 가입해요') +
       '<div class="login-form">' +
-      '<div class="field"><label>이름</label><input type="text" autocomplete="name" data-auth="name" maxlength="40" placeholder="홍길동" value="' + esc(ui.authName) + '"></div>' +
-      '<div class="field"><label>이메일</label><input type="email" autocomplete="email" data-auth="email" placeholder="you@example.com" value="' + esc(ui.emailInput) + '"></div>' +
-      '<div class="field"><label>비밀번호</label><input type="password" autocomplete="new-password" data-auth="password" maxlength="128" aria-describedby="password-hint"><span class="field-help" id="password-hint">영문과 숫자를 포함해 10자 이상 입력해 주세요.</span></div>' +
-      '<div class="field"><label>비밀번호 확인</label><input type="password" autocomplete="new-password" data-auth="confirm" maxlength="128"></div>' +
+      '<div class="field"><label>이름</label><input type="text" autocomplete="name" data-auth="name" maxlength="40" placeholder="홍길동" value="' + esc(ui.authName) + '"' + (codeStep ? ' readonly' : '') + '></div>' +
+      '<div class="field"><label>이메일</label><input type="email" autocomplete="email" data-auth="email" placeholder="you@example.com" value="' + esc(ui.emailInput) + '"' + (codeStep ? ' readonly' : '') + '></div>' +
+      (codeStep ? '<div class="field"><label>인증번호</label><input class="auth-code" type="text" inputmode="numeric" autocomplete="one-time-code" data-auth="code" maxlength="6" placeholder="000000" value="' + esc(ui.authCode) + '"></div>' : '') +
       '<div class="login-err" id="auth-err"' + (ui.authErr ? '' : ' hidden') + '>' + esc(ui.authErr) + '</div>' +
-      '<button class="btn btn-pill btn-full" id="signup-submit" data-act="signup-submit"' + (ready ? '' : ' disabled') + '>' + (ui.authBusy ? '가입 중…' : '가입하기') + '</button>' +
+      '<button class="btn btn-pill btn-full" id="signup-submit" data-act="signup-submit"' + (ready && !ui.authBusy ? '' : ' disabled') + '>' + (ui.authBusy ? '처리 중…' : (codeStep ? '인증하고 가입' : '인증번호 받기')) + '</button>' +
+      (codeStep ? '<button class="auth-back" data-act="auth-back">정보 다시 입력</button>' : '') +
       '<div class="auth-switch">이미 계정이 있나요? <a href="/login" data-nav>로그인</a></div>' +
       '</div>' +
       '</main>'
@@ -786,8 +785,7 @@
 
   function finishAuth(user) {
     store.user = user;
-    ui.authPassword = '';
-    ui.authConfirm = '';
+    ui.authCode = '';
     ui.authErr = '';
     ui.authBusy = false;
     const next = ui.afterLogin || '/my';
@@ -796,32 +794,33 @@
   }
 
   function submitLogin() {
-    if (!emailValid() || !ui.authPassword || ui.authBusy) return;
+    const verify = ui.authStep === 'code' && ui.authPurpose === 'login';
+    if (!emailValid() || (verify && !/^\d{6}$/.test(ui.authCode)) || ui.authBusy) return;
     ui.authBusy = true;
     ui.authErr = '';
     render();
-    authRequest('login', { email: ui.emailInput, password: ui.authPassword })
-      .then((data) => finishAuth(data.user))
+    authRequest(verify ? 'verify-code' : 'request-code', { email: ui.emailInput, purpose: 'login', code: ui.authCode })
+      .then((data) => { if (verify) finishAuth(data.user); else { ui.authBusy = false; ui.authStep = 'code'; ui.authPurpose = 'login'; render(); } })
       .catch((error) => {
         ui.authBusy = false;
         ui.authErr = authErrorMessage(error.message);
-        ui.authPassword = '';
+        ui.authCode = '';
         render();
       });
   }
 
   function submitSignup() {
-    if (ui.authBusy || ui.authName.trim().length < 2 || !emailValid() || !passwordStrong(ui.authPassword) || ui.authPassword !== ui.authConfirm) return;
+    const verify = ui.authStep === 'code' && ui.authPurpose === 'signup';
+    if (ui.authBusy || ui.authName.trim().length < 2 || !emailValid() || (verify && !/^\d{6}$/.test(ui.authCode))) return;
     ui.authBusy = true;
     ui.authErr = '';
     render();
-    authRequest('signup', { name: ui.authName.trim(), email: ui.emailInput, password: ui.authPassword })
-      .then((data) => finishAuth(data.user))
+    authRequest(verify ? 'verify-code' : 'request-code', { name: ui.authName.trim(), email: ui.emailInput, purpose: 'signup', code: ui.authCode })
+      .then((data) => { if (verify) finishAuth(data.user); else { ui.authBusy = false; ui.authStep = 'code'; ui.authPurpose = 'signup'; render(); } })
       .catch((error) => {
         ui.authBusy = false;
         ui.authErr = authErrorMessage(error.message);
-        ui.authPassword = '';
-        ui.authConfirm = '';
+        ui.authCode = '';
         render();
       });
   }
@@ -982,6 +981,16 @@
       case 'go-plan-tokyo': ui.region = 'tokyo'; navigate('/plan'); break;
       case 'go-plan-region': ui.region = el.getAttribute('data-region'); navigate('/plan'); break;
       case 'pick-region': ui.region = el.getAttribute('data-region'); render(); break;
+      case 'map-spot': {
+        const regionId = el.getAttribute('data-region');
+        const spotId = el.getAttribute('data-spot');
+        ui.region = regionId;
+        const idx = ui.sel.findIndex((x) => x.regionId === regionId && x.spotId === spotId);
+        if (idx >= 0) ui.sel.splice(idx, 1);
+        else ui.sel = ui.sel.concat([{ regionId, spotId }]);
+        render();
+        break;
+      }
       case 'toggle-spot': {
         const spotId = el.getAttribute('data-spot');
         const idx = ui.sel.findIndex((x) => x.regionId === ui.region && x.spotId === spotId);
@@ -1009,6 +1018,7 @@
         break;
       case 'login-submit': submitLogin(); break;
       case 'signup-submit': submitSignup(); break;
+      case 'auth-back': ui.authStep = 'email'; ui.authPurpose = ''; ui.authCode = ''; ui.authErr = ''; render(); break;
       case 'admin-open':
         ui.adminSel = el.getAttribute('data-id');
         ui.adminTitle = '';
@@ -1054,15 +1064,14 @@
       const field = t.getAttribute('data-auth');
       if (field === 'email') ui.emailInput = t.value.trimStart();
       else if (field === 'name') ui.authName = t.value;
-      else if (field === 'password') ui.authPassword = t.value;
-      else if (field === 'confirm') ui.authConfirm = t.value;
+      else if (field === 'code') ui.authCode = t.value.replace(/\D/g, '').slice(0, 6);
       ui.authErr = '';
       const err = document.getElementById('auth-err');
       if (err) err.hidden = true;
       const loginBtn = document.getElementById('login-submit');
-      if (loginBtn) loginBtn.disabled = !emailValid() || !ui.authPassword || ui.authBusy;
+      if (loginBtn) loginBtn.disabled = ui.authStep === 'code' ? !/^\d{6}$/.test(ui.authCode) || ui.authBusy : !emailValid() || ui.authBusy;
       const signupBtn = document.getElementById('signup-submit');
-      if (signupBtn) signupBtn.disabled = ui.authName.trim().length < 2 || !emailValid() || !passwordStrong(ui.authPassword) || ui.authPassword !== ui.authConfirm || ui.authBusy;
+      if (signupBtn) signupBtn.disabled = ui.authStep === 'code' ? !/^\d{6}$/.test(ui.authCode) || ui.authBusy : ui.authName.trim().length < 2 || !emailValid() || ui.authBusy;
       return;
     }
 

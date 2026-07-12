@@ -61,6 +61,17 @@ npx wrangler pages secret put PAYAPP_LINKKEY
 npx wrangler pages secret put PAYAPP_LINKVAL
 ```
 
+### 이메일 인증번호 로그인
+
+로그인과 회원가입은 비밀번호 대신 6자리 이메일 인증번호를 사용합니다. Resend에서 발신 도메인을 인증한 뒤 아래 값을 Pages Secret으로 등록하세요.
+
+```bash
+npx wrangler pages secret put RESEND_API_KEY
+npx wrangler pages secret put AUTH_CODE_SECRET
+```
+
+`AUTH_FROM_EMAIL`은 Cloudflare Pages의 일반 환경 변수로 등록합니다. 예: `mytokyomate <login@mytokyomate.com>`. 인증번호는 10분 뒤 만료되고, 1분 이내 재발송 및 5회 초과 입력이 제한됩니다.
+
 ## 배포 (Cloudflare Pages)
 
 두 가지 방법 중 하나:

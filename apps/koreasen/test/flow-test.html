@@ -64,10 +64,10 @@
     // 4. pay requires login; signup and login entry points exist
     click('[data-act="go-pay"]');
     check('redirect to login', location.pathname === '/login');
-    check('password login form', !!document.querySelector('[data-auth="password"]'));
+    check('email code login form', !!document.querySelector('[data-auth="email"]') && !document.querySelector('[data-auth="password"]'));
     click('a[href="/signup"][data-nav]');
     check('signup route', location.pathname === '/signup');
-    check('signup four fields', document.querySelectorAll('[data-auth]').length === 4);
+    check('signup name and email fields', document.querySelectorAll('[data-auth]').length === 2);
 
     // Functions authentication is covered by test/auth-test.mjs. Seed only the
     // in-memory user here so the remaining static UI flow can be exercised.

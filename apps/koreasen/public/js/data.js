@@ -3,8 +3,8 @@
   'use strict';
 
   const REGIONS = [
-    { id: 'tokyo', ko: '도쿄', en: 'TOKYO', desc: '골목 단위까지 상세 안내 가능한 중심 지역', main: true, note: '도쿄메이트의 홈그라운드 — 가장 상세한 안내가 가능해요' },
-    { id: 'kanto', ko: '도쿄 근교', en: 'AROUND TOKYO', desc: '요코하마 · 가마쿠라 · 하코네 · 닛코', note: '도쿄에서 당일치기로 다녀올 수 있어요' },
+    { id: 'tokyo', ko: '도쿄', en: 'TOKYO', desc: '골목 단위까지 상세 안내 가능한 중심 지역', main: true, note: '도쿄메이트의 홈그라운드 — 가장 상세한 안내가 가능해요', map: '/images/tokyo-city-map.svg' },
+    { id: 'kanto', ko: '도쿄 근교', en: 'AROUND TOKYO', desc: '요코하마 · 가마쿠라 · 하코네 · 닛코', note: '도쿄에서 당일치기로 다녀올 수 있어요', map: '/images/tokyo-kanto-map.svg' },
     { id: 'kansai', ko: '간사이', en: 'KANSAI', desc: '오사카 · 교토 · 나라', note: '도쿄와 신칸센으로 연결되는 대표 서브 지역' },
     { id: 'kyushu', ko: '규슈', en: 'KYUSHU', desc: '후쿠오카 · 유후인 · 벳푸', note: '온천과 미식의 남쪽 지역' },
     { id: 'hokkaido', ko: '홋카이도', en: 'HOKKAIDO', desc: '삿포로 · 오타루 · 후라노', note: '설경과 자연이 좋은 북쪽 지역' },
@@ -13,25 +13,25 @@
 
   const SPOTS = {
     tokyo: [
-      { id: 'shibuya', ko: '시부야', en: 'SHIBUYA', cat: '쇼핑 · 스크램블 교차로' },
-      { id: 'shinjuku', ko: '신주쿠', en: 'SHINJUKU', cat: '번화가 · 야경' },
-      { id: 'asakusa', ko: '아사쿠사 · 센소지', en: 'ASAKUSA', cat: '전통 · 사찰' },
-      { id: 'ginza', ko: '긴자', en: 'GINZA', cat: '쇼핑 · 미식' },
-      { id: 'harajuku', ko: '하라주쿠 · 오모테산도', en: 'HARAJUKU', cat: '패션 · 카페' },
-      { id: 'ueno', ko: '우에노', en: 'UENO', cat: '공원 · 박물관' },
-      { id: 'odaiba', ko: '오다이바', en: 'ODAIBA', cat: '베이 · 야경' },
-      { id: 'skytree', ko: '도쿄 스카이트리', en: 'SKYTREE', cat: '전망 · 랜드마크' },
-      { id: 'tsukiji', ko: '쓰키지 장외시장', en: 'TSUKIJI', cat: '시장 · 미식' },
-      { id: 'kichijoji', ko: '기치조지 · 이노카시라', en: 'KICHIJOJI', cat: '공원 · 산책' },
-      { id: 'tokyodome', ko: '도쿄돔 시티', en: 'TOKYO DOME CITY', cat: '테마파크 · 도심' },
-      { id: 'disney', ko: '도쿄 디즈니 리조트', en: 'DISNEY RESORT', cat: '테마파크 · 마이하마' },
-      { id: 'roppongi', ko: '롯폰기 · 도쿄타워', en: 'ROPPONGI', cat: '야경 · 미술관' },
+      { id: 'shibuya', ko: '시부야', en: 'SHIBUYA', cat: '쇼핑 · 스크램블 교차로', mapPos: [38, 57], mapLabel: '시부야' },
+      { id: 'shinjuku', ko: '신주쿠', en: 'SHINJUKU', cat: '번화가 · 야경', mapPos: [35, 42], mapLabel: '신주쿠' },
+      { id: 'asakusa', ko: '아사쿠사 · 센소지', en: 'ASAKUSA', cat: '전통 · 사찰', mapPos: [67, 35], mapLabel: '아사쿠사' },
+      { id: 'ginza', ko: '긴자', en: 'GINZA', cat: '쇼핑 · 미식', mapPos: [57, 57], mapLabel: '긴자' },
+      { id: 'harajuku', ko: '하라주쿠 · 오모테산도', en: 'HARAJUKU', cat: '패션 · 카페', mapPos: [37, 51], mapLabel: '하라주쿠' },
+      { id: 'ueno', ko: '우에노', en: 'UENO', cat: '공원 · 박물관', mapPos: [61, 34], mapLabel: '우에노' },
+      { id: 'odaiba', ko: '오다이바', en: 'ODAIBA', cat: '베이 · 야경', mapPos: [58, 73], mapLabel: '오다이바' },
+      { id: 'skytree', ko: '도쿄 스카이트리', en: 'SKYTREE', cat: '전망 · 랜드마크', mapPos: [74, 42], mapLabel: '스카이트리' },
+      { id: 'tsukiji', ko: '쓰키지 장외시장', en: 'TSUKIJI', cat: '시장 · 미식', mapPos: [60, 63], mapLabel: '쓰키지' },
+      { id: 'kichijoji', ko: '기치조지 · 이노카시라', en: 'KICHIJOJI', cat: '공원 · 산책', mapPos: [16, 43], mapLabel: '기치조지' },
+      { id: 'tokyodome', ko: '도쿄돔 시티', en: 'TOKYO DOME CITY', cat: '테마파크 · 도심', mapPos: [53, 39], mapLabel: '도쿄돔' },
+      { id: 'disney', ko: '도쿄 디즈니 리조트', en: 'DISNEY RESORT', cat: '테마파크 · 마이하마', mapPos: [82, 65], mapLabel: '디즈니' },
+      { id: 'roppongi', ko: '롯폰기 · 도쿄타워', en: 'ROPPONGI', cat: '야경 · 미술관', mapPos: [47, 61], mapLabel: '롯폰기' },
     ],
     kanto: [
-      { id: 'yokohama', ko: '요코하마 미나토미라이', en: 'YOKOHAMA', cat: '항구 · 야경' },
-      { id: 'kamakura', ko: '가마쿠라 · 에노시마', en: 'KAMAKURA', cat: '바다 · 사찰' },
-      { id: 'hakone', ko: '하코네 온천', en: 'HAKONE', cat: '온천 · 후지산 뷰' },
-      { id: 'nikko', ko: '닛코 도쇼구', en: 'NIKKO', cat: '세계유산 · 자연' },
+      { id: 'yokohama', ko: '요코하마 미나토미라이', en: 'YOKOHAMA', cat: '항구 · 야경', mapPos: [43, 72], mapLabel: '요코하마' },
+      { id: 'kamakura', ko: '가마쿠라 · 에노시마', en: 'KAMAKURA', cat: '바다 · 사찰', mapPos: [39, 82], mapLabel: '가마쿠라' },
+      { id: 'hakone', ko: '하코네 온천', en: 'HAKONE', cat: '온천 · 후지산 뷰', mapPos: [27, 79], mapLabel: '하코네' },
+      { id: 'nikko', ko: '닛코 도쇼구', en: 'NIKKO', cat: '세계유산 · 자연', mapPos: [39, 20], mapLabel: '닛코' },
     ],
     kansai: [
       { id: 'dotonbori', ko: '오사카 도톤보리', en: 'DOTONBORI', cat: '번화가 · 미식' },

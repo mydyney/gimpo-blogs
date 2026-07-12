@@ -354,10 +354,17 @@ button { font-family: inherit; }
   overflow: hidden;
   background: var(--pale-blue);
   margin-bottom: 8px;
-  aspect-ratio: 2000 / 2550;
+  aspect-ratio: 720 / 760;
 }
 .jp-map img { width: 100%; height: 100%; display: block; }
+.map-overlay { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
 .map-marker {
+  color: #288068;
+  cursor: pointer;
+  outline: none;
+}
+/* Legacy button marker rules remain compatible with the full-Japan map. */
+.map-marker:is(button) {
   position: absolute;
   transform: translate(-50%, -50%);
   width: 18px;
@@ -371,32 +378,29 @@ button { font-family: inherit; }
   z-index: 1;
 }
 .map-marker .dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 56px;
-  background: #288068;
-  border: 2px solid #fff;
-  display: block;
+  fill: currentColor;
+  stroke: #fff;
+  stroke-width: .5;
+  vector-effect: non-scaling-stroke;
   transition: background-color 0.2s ease;
 }
-.map-marker.active .dot { width: 18px; height: 18px; background: var(--cta-green); }
-.map-marker.place .dot { width: 7px; height: 7px; border-width: 1px; }
-.map-marker.place.active .dot { width: 9px; height: 9px; }
-.map-marker.picked .dot { background: var(--mint); }
-.map-marker.active.picked .dot { background: var(--cta-green); }
+.map-marker.active { color: var(--cta-green); }
+.map-marker.active .dot { stroke-width: .8; }
+.map-marker.picked { color: var(--mint); }
+.map-marker.active.picked { color: var(--cta-green); }
 .map-marker .lbl {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(var(--label-x), calc(-50% + var(--label-y)));
-  font-size: 12px;
+  font-size: 3px;
   font-weight: 700;
-  color: var(--text-primary);
-  white-space: nowrap;
-  text-shadow: 0 1px 0 var(--pale-blue), 1px 0 0 var(--pale-blue), 0 -1px 0 var(--pale-blue), -1px 0 0 var(--pale-blue);
+  fill: var(--text-primary);
+  paint-order: stroke;
+  stroke: var(--pale-blue);
+  stroke-width: .75px;
+  stroke-linejoin: round;
 }
-.map-marker.place .lbl { font-size: 10px; }
-.map-marker.active .lbl { font-weight: 900; color: var(--cta-green); }
+.map-marker.active .lbl { font-weight: 900; fill: var(--cta-green); }
+.map-marker:focus .dot { stroke: #111; stroke-width: 1; }
+.auth-code { font-size: 24px; letter-spacing: 8px; font-weight: 800; text-align: center; }
+.auth-back { border: 0; background: transparent; color: var(--brand-green); text-decoration: underline; cursor: pointer; font-weight: 700; }
 
 .region-tile {
   text-align: left;

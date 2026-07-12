@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 760" role="img" aria-labelledby="title desc">
+  <title id="title">도쿄 상세 지도</title>
+  <desc id="desc">도쿄 도심과 도쿄만의 주요 관광지를 표시하기 위한 지도</desc>
+  <rect width="720" height="760" fill="#dbe8ed"/>
+  <path d="M40 93 190 55 358 85 479 48 647 112 679 244 614 337 651 411 596 480 502 466 453 546 340 523 267 625 133 603 56 481 99 365 49 258Z" fill="#fff" stroke="#b9ccd4" stroke-width="3"/>
+  <path d="M453 546c65-51 114-84 198-135l45 349H344l-4-237Z" fill="#dbe8ed"/>
+  <g fill="none" stroke="#c6d6dc" stroke-width="2">
+    <path d="M99 365 267 353 358 85M267 353l73 170M267 353 479 48M267 353l329 127M190 55l77 298M56 481l211-128M133 603l134-250M614 337 267 353"/>
+  </g>
+  <g fill="#68808b" font-family="sans-serif" font-size="15" font-weight="700" opacity=".75">
+    <text x="111" y="315">서부 도쿄</text><text x="278" y="292">도심</text><text x="500" y="250">동부 도쿄</text><text x="480" y="600">도쿄만</text>
+  </g>
+</svg>
