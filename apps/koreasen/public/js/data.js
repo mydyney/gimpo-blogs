@@ -28,9 +28,9 @@
       { id: 'roppongi', ko: '롯폰기 · 도쿄타워', en: 'ROPPONGI', cat: '야경 · 미술관', mapPos: [52, 55], mapLabel: '롯폰기', labelSide: 'bottom' },
     ],
     kanto: [
-      { id: 'yokohama', ko: '요코하마 미나토미라이', en: 'YOKOHAMA', cat: '항구 · 야경', mapPos: [70, 66], mapLabel: '요코하마', labelSide: 'left' },
-      { id: 'kamakura', ko: '가마쿠라 · 에노시마', en: 'KAMAKURA', cat: '바다 · 사찰', mapPos: [62, 77], mapLabel: '가마쿠라', labelSide: 'left' },
-      { id: 'hakone', ko: '하코네 온천', en: 'HAKONE', cat: '온천 · 후지산 뷰', mapPos: [31, 80], mapLabel: '하코네', labelSide: 'left' },
+      { id: 'yokohama', ko: '요코하마 미나토미라이', en: 'YOKOHAMA', cat: '항구 · 야경', mapPos: [56, 64], mapLabel: '요코하마', labelSide: 'left' },
+      { id: 'kamakura', ko: '가마쿠라 · 에노시마', en: 'KAMAKURA', cat: '바다 · 사찰', mapPos: [50, 73], mapLabel: '가마쿠라', labelSide: 'left' },
+      { id: 'hakone', ko: '하코네 온천', en: 'HAKONE', cat: '온천 · 후지산 뷰', mapPos: [30, 80], mapLabel: '하코네', labelSide: 'left' },
       { id: 'nikko', ko: '닛코 도쇼구', en: 'NIKKO', cat: '세계유산 · 자연', mapPos: [39, 20], mapLabel: '닛코', labelSide: 'right' },
     ],
     kansai: [
