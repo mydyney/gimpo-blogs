@@ -3,3 +3,6 @@
 
 # Deps (none currently, but keep out if added)
 node_modules/
+
+# Local dev secrets for wrangler pages dev
+.dev.vars
