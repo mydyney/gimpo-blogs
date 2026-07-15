@@ -26,7 +26,7 @@ export function validForm(value) {
   const date = String(value.date || '');
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
   const phone = String(value.phone || '').replace(/\D/g, '');
-  if (!/^\d{10,11}$/.test(phone)) return null;
+  if (!/^01[016789]\d{7,8}$/.test(phone) || (phone.startsWith('010') && phone.length !== 11)) return null;
   const field = (name, max) => String(value[name] || '').trim().slice(0, max);
   return {
     count: field('count', 20), group: field('group', 40), phone, date,

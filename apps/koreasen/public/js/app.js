@@ -31,7 +31,7 @@
     payMethod: 'card',
     emailInput: '', authName: '', authCode: '', authStep: 'email', authPurpose: '', authErr: '', authBusy: false, afterLogin: null,
     requestBusy: false, requestErr: '', adminBusy: false, adminErr: '',
-    notifOpen: false,
+    notifOpen: false, mobileMenuOpen: false,
     adminSel: null, adminTitle: '', adminBody: '',
     adminRegions: null, adminRegionsSaved: false,
   };
@@ -59,6 +59,7 @@
   function navigate(to) {
     if (path() !== to) history.pushState({}, '', to);
     ui.notifOpen = false;
+    ui.mobileMenuOpen = false;
     render();
     window.scrollTo(0, 0);
   }
@@ -160,17 +161,22 @@
     }
 
     headerEl.innerHTML =
-      '<div class="container bar">' +
+      '<div class="container bar' + (ui.mobileMenuOpen ? ' mobile-open' : '') + '">' +
       '<a class="logo" href="/" data-nav>' +
       '<span class="logo-main">mytokyomate</span>' +
       '<span class="logo-sub">TOKYOMATE JAPAN TRAVEL GUIDE</span>' +
       '</a>' +
+      '<button class="mobile-menu-btn" type="button" data-act="toggle-mobile-menu" aria-expanded="' + (ui.mobileMenuOpen ? 'true' : 'false') + '" aria-label="메뉴 ' + (ui.mobileMenuOpen ? '닫기' : '열기') + '">' +
+      '<span></span><span></span><span></span>' +
+      '</button>' +
+      '<div class="header-menu">' +
       '<nav class="site-nav">' +
       '<a href="/" data-nav class="' + navClass(route, 'home') + '">홈</a>' +
       '<a href="/plan" data-nav class="' + navClass(route, 'planner') + '">여행 계획 요청</a>' +
       '<a href="/my" data-nav-my class="' + navClass(route, 'mypage') + '">마이페이지</a>' +
       '</nav>' +
       '<div class="header-right">' + right + '</div>' +
+      '</div>' +
       '</div>';
   }
 
@@ -399,7 +405,7 @@
       selectField('동반자 구성', 'group', D.FORM_OPTIONS.group) +
       '</div>' +
       '<div class="form-row">' +
-      '<div class="field"><label>연락처</label><input type="tel" inputmode="tel" data-form="phone" placeholder="01012345678" value="' + esc(ui.form.phone) + '"></div>' +
+      '<div class="field"><label>결제자 휴대전화</label><input type="tel" inputmode="tel" autocomplete="tel" data-form="phone" placeholder="01012345678" value="' + esc(ui.form.phone) + '"><span class="field-help">PayApp 결제창에 사용할 실제 국내 휴대전화번호를 입력해 주세요.</span></div>' +
       '<div class="field"><label>입국 날짜</label><input type="date" data-form="date" value="' + esc(ui.form.date) + '"></div>' +
       '</div>' +
       '<div class="form-row">' +
@@ -422,7 +428,7 @@
 
   function phoneIncomplete() {
     const digits = String(ui.form.phone || '').replace(/\D/g, '');
-    return digits.length < 10 || digits.length > 11;
+    return !/^01[016789]\d{7,8}$/.test(digits) || (digits.indexOf('010') === 0 && digits.length !== 11);
   }
 
   function viewPay() {
@@ -870,7 +876,15 @@
       location.href = data.payurl;
     }).catch((error) => {
       ui.requestBusy = false;
-      ui.requestErr = error.message === 'unauthorized' ? '로그인이 만료되었습니다. 다시 로그인해 주세요.' : '결제창을 열지 못했습니다. 연락처와 결제 정보를 확인해 주세요.';
+      const payErrors = {
+        unauthorized: '로그인이 만료되었습니다. 다시 로그인해 주세요.',
+        payapp_not_configured: '결제 설정을 확인하는 중입니다. 잠시 후 다시 시도해 주세요.',
+        payapp_unreachable: 'PayApp에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.',
+        invalid_request: '입력한 연락처와 여행 정보를 다시 확인해 주세요.',
+      };
+      ui.requestErr = payErrors[error.message] || (error.message.indexOf('휴대전화번호') >= 0
+        ? 'PayApp에서 휴대전화번호를 확인하지 못했습니다. 실제 국내 휴대전화번호를 입력해 주세요.'
+        : '결제창을 열지 못했습니다. ' + error.message);
       if (error.message === 'unauthorized') { store.user = null; ui.afterLogin = '/plan/pay'; navigate('/login'); }
       else render();
     });
@@ -969,6 +983,11 @@
     }
 
     switch (el.getAttribute('data-act')) {
+      case 'toggle-mobile-menu':
+        ui.mobileMenuOpen = !ui.mobileMenuOpen;
+        ui.notifOpen = false;
+        render();
+        break;
       case 'toggle-notif':
         ui.notifOpen = !ui.notifOpen;
         render();
