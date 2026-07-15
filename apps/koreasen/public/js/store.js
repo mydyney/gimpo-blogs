@@ -4,6 +4,7 @@
   'use strict';
 
   const D = global.MTM_DATA;
+  const I = global.MTM_I18N;
 
   const store = {
     user: null,          // { email }
@@ -21,7 +22,7 @@
 
   function spotName(regionId, spotId) {
     const sp = (D.SPOTS[regionId] || []).find((s) => s.id === spotId);
-    return sp ? sp.ko : spotId;
+    return sp ? (sp[I.locale] || (I.locale === 'ko' ? sp.ko : sp.en) || sp.ko) : spotId;
   }
 
   function selLabel(sel) {
@@ -30,23 +31,21 @@
 
   function metaLabel(form) {
     return [
-      form.count + ' (' + form.group + ')',
-      form.phone ? '연락처 ' + form.phone : null,
-      '입국 ' + (form.date || '미정'),
-      form.duration,
-      '예산 ' + form.budget,
-      form.lodging ? '숙소 ' + form.lodging : null,
+      D.optionLabel('count', form.count, I.locale) + ' (' + D.optionLabel('group', form.group, I.locale) + ')',
+      form.e164Phone || form.phone ? I.phrase('연락처') + ' ' + (form.e164Phone || form.phone) : null,
+      I.phrase('입국') + ' ' + (form.date || I.phrase('미정')),
+      D.optionLabel('duration', form.duration, I.locale),
+      I.t('notes') === '요청사항' ? '예산 ' + D.optionLabel('budget', form.budget, I.locale) : I.phrase('예산') + ' ' + D.optionLabel('budget', form.budget, I.locale),
+      form.lodging ? I.phrase('숙소') + ' ' + form.lodging : null,
     ].filter(Boolean).join(' · ');
   }
 
   function fmtWhen(ts) {
-    const d = new Date(ts);
-    const p = (n) => String(n).padStart(2, '0');
-    return d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+    return I.formatDate(ts);
   }
 
   function priceLabel() {
-    return '₩' + Number(D.PRICE_WON).toLocaleString('ko-KR');
+    return I.formatMoney(D.PRICE_WON, 'KRW');
   }
 
   global.MTM_STORE = { store, load, persist, spotName, selLabel, metaLabel, fmtWhen, priceLabel };

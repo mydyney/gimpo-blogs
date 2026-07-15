@@ -70,13 +70,12 @@ export async function getSession(request, db) {
   if (!/^[A-Za-z0-9_-]{43}$/.test(token)) return null;
   const tokenHash = await sha256(token);
   const row = await db.prepare(
-    'SELECT s.token_hash, s.user_id, u.email, u.name FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ?'
+    'SELECT s.token_hash, s.user_id, u.email, u.name, u.preferred_locale FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token_hash = ? AND s.expires_at > ?'
   ).bind(tokenHash, Date.now()).first();
-  return row ? { tokenHash, user: { id: row.user_id, email: row.email, name: row.name } } : null;
+  return row ? { tokenHash, user: { id: row.user_id, email: row.email, name: row.name, preferred_locale: row.preferred_locale } } : null;
 }
 
 export async function requireUser(request, db) {
   const session = await getSession(request, db);
   return session || json({ ok: false, error: 'unauthorized' }, { status: 401 });
 }
-

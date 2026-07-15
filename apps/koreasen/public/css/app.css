@@ -10,6 +10,27 @@ body {
   line-height: var(--lh-body);
   color: var(--text-primary);
 }
+
+/* Locale and international checkout controls */
+.locale-picker select { min-width:104px; height:38px; border:1px solid #c3d3da; border-radius:999px; background:#fff; padding:0 30px 0 12px; color:#172028; font:inherit; font-size:13px; }
+.phone-field { display:grid; grid-template-columns:minmax(116px,.42fr) minmax(0,1fr); gap:8px; }
+.phone-field select, .phone-field input { min-width:0; }
+.admin-locale-filter { float:right; display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:500; }
+.admin-locale-filter select { min-height:36px; border:1px solid #c3d3da; background:#fff; padding:0 28px 0 10px; }
+.locale-badge { display:inline-block; margin-left:6px; padding:2px 7px; border-radius:999px; background:#e9f6ed; color:#008f3b; font-size:11px; font-weight:800; }
+.payment-toggle-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:18px; }
+.payment-toggle { display:flex; align-items:center; gap:10px; border:1px solid #c3d3da; padding:12px; cursor:pointer; }
+.payment-toggle input { width:18px; height:18px; accent-color:#009d3d; }
+.payment-toggle span { display:grid; gap:2px; }
+.payment-toggle small { color:#667580; }
+
+@media (max-width: 760px) {
+  .locale-picker { width:100%; }
+  .locale-picker select { width:100%; }
+  .phone-field { grid-template-columns:1fr; }
+  .payment-toggle-grid { grid-template-columns:1fr; }
+  .admin-locale-filter { float:none; display:flex; margin-top:10px; }
+}
 a { color: var(--link); text-decoration: none; transition: color 0.2s ease; }
 a:hover { color: var(--link-hover); }
 input[type="date"] { font-family: inherit; }

@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import { validForm } from '../functions/_lib/catalog.js';
+import { statusLabel, validLocale } from '../functions/_lib/locale.js';
+
+const base = { count: 'count_2', group: 'couple', date: '2026-10-10', duration: 'nights_3', budget: '1m_2m', lodging: '', notes: '' };
+
+const kr = validForm({ ...base, countryCode: '82', phone: '010-1234-5678' });
+assert.equal(kr.e164Phone, '+821012345678');
+const cn = validForm({ ...base, countryCode: '86', phone: '13800138000' });
+assert.equal(cn.e164Phone, '+8613800138000');
+const jp = validForm({ ...base, countryCode: '81', phone: '090-1234-5678' });
+assert.equal(jp.e164Phone, '+819012345678');
+assert.equal(validForm({ ...base, countryCode: '86', phone: '1000' }), null);
+
+assert.equal(validLocale('zh'), 'zh');
+assert.equal(validLocale('fr'), 'ko');
+assert.equal(statusLabel('guide_arrived', 'ja'), 'ガイド完成');
+
+const paymentSource = await readFile(new URL('../functions/api/payments/payapp/[[path]].js', import.meta.url), 'utf8');
+assert.match(paymentSource, /wechat:\s*'wechat'/);
+assert.match(paymentSource, /apple:\s*'applepay'/);
+assert.match(paymentSource, /vccode:\s*form\.countryCode/);
+assert.match(paymentSource, /pay_type/);
+assert.match(paymentSource, /method_mismatch/);
+
+console.log('PASS i18n + PayApp: stable codes, international phones, localized statuses, WeChat/Apple callback tracking');

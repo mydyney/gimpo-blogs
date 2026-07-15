@@ -4,13 +4,18 @@
 
   const D = window.MTM_DATA;
   const S = window.MTM_STORE;
+  const I = window.MTM_I18N;
   const store = S.store;
   const IS_ADMIN_HOST = location.hostname === 'admin.mytokyomate.com' || location.hostname === 'admin.localhost';
+  if (!IS_ADMIN_HOST && !/^\/(ko|en|ja|zh)(?:\/|$)/.test(location.pathname)) {
+    history.replaceState({}, '', I.href(location.pathname));
+  }
 
   // Which regions are exposed on the site. null = show all (until the shared
   // config loads / when unset). Seeded from a localStorage cache for an instant
   // correct first paint, then refreshed from /api/regions (KV-backed).
   let visibleRegionIds = null;
+  let enabledPaymentMethods = null;
   try {
     const cached = JSON.parse(localStorage.getItem('mtm_visible_regions') || 'null');
     if (Array.isArray(cached)) visibleRegionIds = cached;
@@ -27,13 +32,14 @@
   const ui = {
     region: 'tokyo',
     sel: [],                                   // [{regionId, spotId}]
-    form: { count: '2명', group: '커플 · 부부', phone: '', date: '', duration: '3박 4일', budget: '100~200만원', lodging: '', notes: '' },
-    payMethod: 'card',
+    form: { count: 'count_2', group: 'couple', countryCode: I.locale === 'zh' ? '86' : (I.locale === 'ja' ? '81' : '82'), phone: '', date: '', duration: 'nights_3', budget: '1m_2m', lodging: '', notes: '' },
+    payMethod: I.locale === 'zh' ? 'wechat' : ((I.locale === 'en' || I.locale === 'ja') ? 'apple' : 'card'),
     emailInput: '', authName: '', authCode: '', authStep: 'email', authPurpose: '', authErr: '', authBusy: false, afterLogin: null,
     requestBusy: false, requestErr: '', adminBusy: false, adminErr: '',
     notifOpen: false, mobileMenuOpen: false,
-    adminSel: null, adminTitle: '', adminBody: '',
+    adminSel: null, adminTitle: '', adminBody: '', adminLocale: 'all',
     adminRegions: null, adminRegionsSaved: false,
+    adminPayments: null, adminPaymentsSaved: false,
   };
 
   const viewEl = document.getElementById('view');
@@ -46,6 +52,10 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  function contentName(item) {
+    return item ? (item[I.locale] || (I.locale === 'ko' ? item.ko : item.en) || item.ko || item.en) : '';
+  }
+
   function spotPhoto(id, label, eager) {
     return '<img class="place-photo" src="/images/spots/' + esc(id) + '.jpg" alt="' + esc(label) + '"' +
       ' loading="' + (eager ? 'eager' : 'lazy') + '" decoding="async">';
@@ -53,11 +63,11 @@
 
   // ===== Router =====
   function path() {
-    return location.pathname.replace(/\/+$/, '') || '/';
+    return I.routePath(location.pathname);
   }
 
   function navigate(to) {
-    if (path() !== to) history.pushState({}, '', to);
+    if (path() !== I.routePath(to)) history.pushState({}, '', I.href(to));
     ui.notifOpen = false;
     ui.mobileMenuOpen = false;
     render();
@@ -136,11 +146,11 @@
     let right = '';
     if (user) {
       right =
-        '<button class="notif-btn" data-act="toggle-notif">알림' +
+        '<button class="notif-btn" data-act="toggle-notif">' + I.t('notifications') +
         (unread > 0 ? '<span class="notif-badge">' + unread + '</span>' : '') +
         '</button>' +
         '<span class="header-email">' + esc(user.email) + '</span>' +
-        '<button class="logout-btn" data-act="logout">로그아웃</button>';
+        '<button class="logout-btn" data-act="logout">' + I.t('logout') + '</button>';
       if (ui.notifOpen) {
         const items = myNotifs.slice().reverse().map((n) =>
           '<button class="notif-item' + (n.read ? '' : ' unread') + '" data-act="open-notif" data-id="' + esc(n.id) + '">' +
@@ -150,14 +160,14 @@
         ).join('');
         right +=
           '<div class="notif-panel">' +
-          '<div class="np-head">알림</div>' +
+          '<div class="np-head">' + I.t('notifications') + '</div>' +
           (myNotifs.length === 0 ? '<div class="np-empty">아직 알림이 없습니다.</div>' : items) +
           '</div>';
       }
     } else {
       right =
-        '<a class="header-signup" href="/signup" data-nav>가입하기</a>' +
-        '<a class="btn btn-outline" href="/login" data-nav>로그인</a>';
+        '<a class="header-signup" href="/signup" data-nav>' + I.t('signup') + '</a>' +
+        '<a class="btn btn-outline" href="/login" data-nav>' + I.t('login') + '</a>';
     }
 
     headerEl.innerHTML =
@@ -171,11 +181,13 @@
       '</button>' +
       '<div class="header-menu">' +
       '<nav class="site-nav">' +
-      '<a href="/" data-nav class="' + navClass(route, 'home') + '">홈</a>' +
-      '<a href="/plan" data-nav class="' + navClass(route, 'planner') + '">여행 계획 요청</a>' +
-      '<a href="/my" data-nav-my class="' + navClass(route, 'mypage') + '">마이페이지</a>' +
+      '<a href="/" data-nav class="' + navClass(route, 'home') + '">' + I.t('home') + '</a>' +
+      '<a href="/plan" data-nav class="' + navClass(route, 'planner') + '">' + I.t('plan') + '</a>' +
+      '<a href="/my" data-nav-my class="' + navClass(route, 'mypage') + '">' + I.t('my') + '</a>' +
       '</nav>' +
-      '<div class="header-right">' + right + '</div>' +
+      '<div class="header-right"><label class="locale-picker"><span class="sr-only">Language</span><select data-act="locale">' +
+      I.LOCALES.map((code) => '<option value="' + code + '"' + (I.locale === code ? ' selected' : '') + '>' + esc(I.META[code].name) + '</option>').join('') +
+      '</select></label>' + right + '</div>' +
       '</div>' +
       '</div>';
   }
@@ -194,7 +206,7 @@
       '<div class="ft-sub">Tokyomate가 추천하는 일본 여행 가이드 · mytokyomate.com</div>' +
       '</div>' +
       '<div class="ft-links">' +
-      '<a href="/attribution" target="_blank" rel="noopener">사진·지도 출처</a>' +
+      '<a href="/attribution.html" target="_blank" rel="noopener">사진·지도 출처</a>' +
       '<a href="https://blog.naver.com/tokyomate">네이버 블로그</a>' +
       '<a href="https://tripmate.news/">tripmate.news</a>' +
       '</div>' +
@@ -252,10 +264,10 @@
       '<div class="hl-grid">' +
       highlights.map((s, i) =>
         '<div class="hl-card">' +
-        '<div class="hl-img">' + spotPhoto(s.id, s.ko + ' 대표 사진') + '</div>' +
+        '<div class="hl-img">' + spotPhoto(s.id, contentName(s)) + '</div>' +
         '<button class="hl-body" data-act="go-plan-tokyo">' +
-        '<span class="hl-name">' + esc(s.ko) + '</span>' +
-        '<span class="hl-cat">' + esc(s.cat) + '</span>' +
+        '<span class="hl-name">' + esc(contentName(s)) + '</span>' +
+        '<span class="hl-cat">' + esc(I.category(s.cat)) + '</span>' +
         '</button>' +
         '</div>'
       ).join('') +
@@ -269,7 +281,7 @@
           subRegions.map((r) =>
             '<button class="sr-card" data-act="go-plan-region" data-region="' + r.id + '">' +
             '<div class="sr-en">' + esc(r.en) + '</div>' +
-            '<div class="sr-ko">' + esc(r.ko) + '</div>' +
+            '<div class="sr-ko">' + esc(contentName(r)) + '</div>' +
             '<div class="sr-desc">' + esc(r.desc) + '</div>' +
             '</button>'
           ).join('') +
@@ -304,7 +316,7 @@
       bottom: { x: 0, y: 3.6, anchor: 'middle' },
     };
     const markers = (D.SPOTS[activeRegion.id] || []).filter((spot) => spot.mapPos).map((spot) => ({
-      id: spot.id, regionId: activeRegion.id, label: spot.mapLabel || spot.ko, pos: spot.mapPos,
+      id: spot.id, regionId: activeRegion.id, label: I.locale === 'ko' ? (spot.mapLabel || spot.ko) : contentName(spot), pos: spot.mapPos,
       side: LABEL_SIDES[spot.labelSide] || LABEL_SIDES.right,
     })).map((marker) => {
       const active = ui.region === marker.regionId;
@@ -326,7 +338,7 @@
       return (
         '<button class="region-tile' + (r.main ? ' main' : '') + (active ? ' active' : '') + '" data-act="pick-region" data-region="' + r.id + '">' +
         '<span class="rt-en">' + esc(r.en) + '</span>' +
-        '<span class="rt-ko">' + esc(r.ko) + '</span>' +
+        '<span class="rt-ko">' + esc(contentName(r)) + '</span>' +
         '<span class="rt-desc">' + esc(r.desc) + '</span>' +
         (count > 0 ? '<span class="rt-count">' + count + '</span>' : '') +
         '</button>'
@@ -339,10 +351,10 @@
       return (
         '<div class="spot-card' + (selected ? ' selected' : '') + '">' +
         (selected ? '<span class="sp-order">' + (idx + 1) + '</span>' : '') +
-        '<div class="sp-img">' + spotPhoto(sp.id, sp.ko + ' 대표 사진') + '</div>' +
+        '<div class="sp-img">' + spotPhoto(sp.id, contentName(sp)) + '</div>' +
         '<button class="sp-body" title="눌러서 선택 · 해제" data-act="toggle-spot" data-spot="' + sp.id + '">' +
-        '<span class="sp-name">' + esc(sp.ko) + '</span>' +
-        '<span class="sp-cat">' + esc(sp.cat) + '</span>' +
+        '<span class="sp-name">' + esc(contentName(sp)) + '</span>' +
+        '<span class="sp-cat">' + esc(I.category(sp.cat)) + '</span>' +
         '</button>' +
         '</div>'
       );
@@ -361,7 +373,7 @@
       sectionTitle('여행 계획 요청 · 1단계', 'PICK YOUR SPOTS', '지역을 고른 뒤, 가고 싶은 관광지를 선택해 주세요') +
       '<div class="planner-grid">' +
       '<div class="region-rail">' +
-      '<div class="jp-map tokyo-map"><img src="' + esc(activeRegion.map || '/images/tokyo-kanto-map-ai.png') + '" alt="' + esc(activeRegion.ko) + ' 상세 지도">' + markerLayer + '</div>' +
+      '<div class="jp-map tokyo-map"><img src="' + esc(activeRegion.map || '/images/tokyo-kanto-map-ai.png') + '" alt="' + esc(contentName(activeRegion)) + '">' + markerLayer + '</div>' +
       tiles +
       '</div>' +
       '<div>' +
@@ -389,7 +401,7 @@
     return (
       '<div class="field"><label>' + esc(label) + '</label>' +
       '<select data-form="' + key + '">' +
-      options.map((o) => '<option value="' + esc(o) + '"' + (ui.form[key] === o ? ' selected' : '') + '>' + esc(o) + '</option>').join('') +
+      options.map((o) => '<option value="' + esc(o.value) + '"' + (ui.form[key] === o.value || ui.form[key] === o.ko ? ' selected' : '') + '>' + esc(o[I.locale] || o.en || o.ko) + '</option>').join('') +
       '</select></div>'
     );
   }
@@ -405,7 +417,11 @@
       selectField('동반자 구성', 'group', D.FORM_OPTIONS.group) +
       '</div>' +
       '<div class="form-row">' +
-      '<div class="field"><label>결제자 휴대전화</label><input type="tel" inputmode="tel" autocomplete="tel" data-form="phone" placeholder="01012345678" value="' + esc(ui.form.phone) + '"><span class="field-help">PayApp 결제창에 사용할 실제 국내 휴대전화번호를 입력해 주세요.</span></div>' +
+      '<div class="field"><label>' + I.t('payerPhone') + '</label><div class="phone-field">' +
+      '<select data-form="countryCode" aria-label="' + I.t('countryCode') + '">' +
+      [['82', '한국 +82'], ['86', '中国 +86'], ['81', '日本 +81'], ['1', 'US/CA +1'], ['44', 'UK +44'], ['61', 'AU +61'], ['65', 'SG +65']].map((item) => '<option value="' + item[0] + '"' + (ui.form.countryCode === item[0] ? ' selected' : '') + '>' + item[1] + '</option>').join('') +
+      '</select><input type="tel" inputmode="tel" autocomplete="tel-national" data-form="phone" placeholder="' + (ui.form.countryCode === '82' ? '01012345678' : 'Mobile number') + '" value="' + esc(ui.form.phone) + '"></div>' +
+      '<span class="field-help">PayApp 결제창에 사용할 실제 휴대전화번호를 입력해 주세요.</span></div>' +
       '<div class="field"><label>입국 날짜</label><input type="date" data-form="date" value="' + esc(ui.form.date) + '"></div>' +
       '</div>' +
       '<div class="form-row">' +
@@ -428,7 +444,11 @@
 
   function phoneIncomplete() {
     const digits = String(ui.form.phone || '').replace(/\D/g, '');
-    return !/^01[016789]\d{7,8}$/.test(digits) || (digits.indexOf('010') === 0 && digits.length !== 11);
+    const code = String(ui.form.countryCode || '82');
+    if (code === '82') return !/^01[016789]\d{7,8}$/.test(digits) || (digits.indexOf('010') === 0 && digits.length !== 11);
+    if (code === '86') return !/^1[3-9]\d{9}$/.test(digits);
+    if (code === '81') return !/^0?[789]0\d{8}$/.test(digits);
+    return digits.length < 7 || digits.length > 15;
   }
 
   function viewPay() {
@@ -436,14 +456,17 @@
     const price = S.priceLabel();
     const rows = [
       ['관광지', S.selLabel(ui.sel) || '—'],
-      ['동반자', f.count + ' · ' + f.group],
+      ['동반자', D.optionLabel('count', f.count, I.locale) + ' · ' + D.optionLabel('group', f.group, I.locale)],
       ['입국 날짜', f.date || '미정'],
-      ['여행 기간', f.duration],
-      ['예산', f.budget],
+      ['여행 기간', D.optionLabel('duration', f.duration, I.locale)],
+      ['예산', D.optionLabel('budget', f.budget, I.locale)],
       ['숙소 선호', f.lodging || '특별한 선호 없음'],
       ['요청사항', f.notes || '없음'],
     ];
-    const methodObj = D.PAY_METHODS.find((m) => m.id === ui.payMethod) || D.PAY_METHODS[0];
+    const appleAvailable = Boolean(window.ApplePaySession && window.ApplePaySession.canMakePayments && window.ApplePaySession.canMakePayments());
+    const methods = D.paymentMethods(I.locale, enabledPaymentMethods, appleAvailable);
+    if (!methods.some((m) => m.id === ui.payMethod)) ui.payMethod = methods.length ? methods[0].id : 'card';
+    const methodObj = methods.find((m) => m.id === ui.payMethod) || methods[0] || D.PAY_METHODS.find((m) => m.id === 'card');
     const disabled = ui.requestBusy || phoneIncomplete();
 
     return (
@@ -458,14 +481,14 @@
       '<div class="pay-methods">' +
       '<div class="pm-title">결제 수단</div>' +
       '<div class="pm-grid">' +
-      D.PAY_METHODS.map((m) =>
+      methods.map((m) =>
         '<button class="pm-card' + (ui.payMethod === m.id ? ' on' : '') + '" data-act="pick-method" data-method="' + m.id + '">' +
         '<span class="pm-en">' + esc(m.en) + '</span>' +
-        '<span class="pm-ko">' + esc(m.ko) + '</span>' +
+        '<span class="pm-ko">' + esc(m[I.locale] || m.en || m.ko) + '</span>' +
         '</button>'
       ).join('') +
       '</div>' +
-      '<div class="easy-note">결제하기를 누르면 페이앱의 ' + esc(methodObj.ko) + ' 결제창으로 이동합니다. 결제가 완료된 요청만 관리자에게 접수됩니다.</div>' +
+      '<div class="easy-note">PayApp · ' + esc(methodObj[I.locale] || methodObj.en || methodObj.ko) + '<br>' + I.t('krwCharge') + '</div>' +
       '</div>' +
       '<div class="price-band">' +
       '<span class="pb-label">여행 계획 요청 1건</span>' +
@@ -551,7 +574,7 @@
     if (!IS_ADMIN_HOST) return Promise.resolve();
     ui.adminBusy = true;
     ui.adminErr = '';
-    return apiRequest('/api/admin/requests')
+    return apiRequest('/api/admin/requests?locale=' + encodeURIComponent(ui.adminLocale))
       .then((data) => { store.requests = (data.requests || []).slice().reverse(); })
       .catch(() => { ui.adminErr = '요청 목록을 불러오지 못했습니다.'; })
       .finally(() => { ui.adminBusy = false; render(); });
@@ -613,7 +636,7 @@
           '<div class="rq-main">' +
           '<div class="rq-head">' +
           '<span class="rq-id">' + esc(q.id) + '</span>' +
-          '<span class="status-badge' + (q.status === '가이드 도착' ? ' arrived' : '') + '">' + esc(q.status) + '</span>' +
+          '<span class="status-badge' + (q.statusCode === 'guide_arrived' ? ' arrived' : '') + '">' + esc(q.status) + '</span>' +
           '</div>' +
           '<div class="rq-spots">' + esc(S.selLabel(q.sel)) + '</div>' +
           '<div class="rq-meta">' + esc(S.metaLabel(q.form) + ' · ' + S.fmtWhen(q.createdAt) + ' 접수') + '</div>' +
@@ -690,6 +713,20 @@
     );
   }
 
+  function viewPaymentSettings() {
+    if (ui.adminPayments === null) ui.adminPayments = (enabledPaymentMethods || D.PAY_METHODS.map((item) => item.id)).slice();
+    const methods = D.PAY_METHODS.map((method) => {
+      const checked = ui.adminPayments.includes(method.id);
+      return '<label class="payment-toggle"><input type="checkbox" data-admin-payment="' + method.id + '"' + (checked ? ' checked' : '') + (method.id === 'card' ? ' disabled' : '') + '>' +
+        '<span><b>' + esc(method.en) + '</b><small>' + esc(method.ko) + (method.id === 'card' ? ' · 필수' : '') + '</small></span></label>';
+    }).join('');
+    return '<div class="admin-regions admin-payments"><div class="ar-title">PayApp 결제수단</div>' +
+      '<div class="ar-desc">PayApp 판매자 설정에서 활성화한 수단만 선택하세요. 카드는 해외 결제 대체 수단으로 항상 유지됩니다.</div>' +
+      '<div class="payment-toggle-grid">' + methods + '</div><div class="ad-actions">' +
+      '<button class="btn btn-pill" data-act="save-payments">결제수단 저장</button>' +
+      '<span class="form-hint">' + (ui.adminPaymentsSaved ? '저장되었습니다 ✓' : '') + '</span></div></div>';
+  }
+
   function viewAdmin() {
     const reqs = store.requests.slice().reverse();
     const aq = store.requests.find((q) => q.id === ui.adminSel);
@@ -698,7 +735,7 @@
       '<button class="admin-req' + (ui.adminSel === q.id ? ' on' : '') + '" data-act="admin-open" data-id="' + esc(q.id) + '">' +
       '<div class="ar-head">' +
       '<span class="ar-id">' + esc(q.id) + '</span>' +
-      '<span class="status-badge' + (q.status === '가이드 도착' ? ' arrived' : '') + '">' + esc(q.status) + '</span>' +
+      '<span class="status-badge' + (q.statusCode === 'guide_arrived' ? ' arrived' : '') + '">' + esc(q.status) + '</span>' +
       '</div>' +
       '<div class="ar-spots">' + esc(S.selLabel(q.sel)) + '</div>' +
       '<div class="ar-meta">' + esc(q.email + ' · ' + S.fmtWhen(q.createdAt)) + '</div>' +
@@ -730,7 +767,7 @@
         '<div class="admin-detail">' +
         '<div class="ad-title">' + esc(aq.id) + ' · 가이드 작성</div>' +
         '<div class="ad-info">' +
-        '<b>요청자</b> · ' + esc(aq.email) + '<br>' +
+        '<b>요청자</b> · ' + esc(aq.email) + ' <span class="locale-badge">' + esc(String(aq.locale || 'ko').toUpperCase()) + '</span><br>' +
         '<b>관광지</b> · ' + esc(S.selLabel(aq.sel)) + '<br>' +
         '<b>여행 정보</b> · ' + esc(S.metaLabel(aq.form)) + '<br>' +
         '<b>요청사항</b> · ' + esc(aq.form.notes || '없음') +
@@ -748,7 +785,10 @@
       '<span class="admin-tag">내부용 화면</span>' +
       '</div>' +
       viewRegionSettings() +
-      '<div class="admin-section-title">여행 계획 요청</div>' +
+      viewPaymentSettings() +
+      '<div class="admin-section-title">여행 계획 요청 <label class="admin-locale-filter">언어 <select data-admin-locale>' +
+      [['all', '전체'], ['ko', '한국어'], ['en', '영어'], ['ja', '일본어'], ['zh', '중국어(간체)']].map((item) => '<option value="' + item[0] + '"' + (ui.adminLocale === item[0] ? ' selected' : '') + '>' + item[1] + '</option>').join('') +
+      '</select></label></div>' +
       (ui.adminErr ? '<div class="login-err">' + esc(ui.adminErr) + '</div>' : '') +
       (ui.adminBusy && reqs.length === 0
         ? '<div class="admin-empty">요청 목록을 불러오는 중입니다…</div>'
@@ -764,7 +804,7 @@
     const route = currentRoute();
     const redirect = guard(route);
     if (redirect) {
-      history.replaceState({}, '', redirect);
+      history.replaceState({}, '', I.href(redirect));
       return render();
     }
 
@@ -784,7 +824,7 @@
       case 'admin': viewEl.innerHTML = viewAdmin(); break;
     }
 
-    document.title = 'mytokyomate | 일본 여행 계획 컨시어지';
+    I.localizeDocument(document);
   }
 
   // --- actions (event delegation) ---
@@ -814,7 +854,7 @@
     ui.authBusy = true;
     ui.authErr = '';
     render();
-    authRequest(verify ? 'verify-code' : 'request-code', { email: ui.emailInput, purpose: 'login', code: ui.authCode })
+    authRequest(verify ? 'verify-code' : 'request-code', { email: ui.emailInput, purpose: 'login', code: ui.authCode, locale: I.locale })
       .then((data) => { if (verify) finishAuth(data.user); else { ui.authBusy = false; ui.authStep = 'code'; ui.authPurpose = 'login'; render(); } })
       .catch((error) => {
         ui.authBusy = false;
@@ -830,7 +870,7 @@
     ui.authBusy = true;
     ui.authErr = '';
     render();
-    authRequest(verify ? 'verify-code' : 'request-code', { name: ui.authName.trim(), email: ui.emailInput, purpose: 'signup', code: ui.authCode })
+    authRequest(verify ? 'verify-code' : 'request-code', { name: ui.authName.trim(), email: ui.emailInput, purpose: 'signup', code: ui.authCode, locale: I.locale })
       .then((data) => { if (verify) finishAuth(data.user); else { ui.authBusy = false; ui.authStep = 'code'; ui.authPurpose = 'signup'; render(); } })
       .catch((error) => {
         ui.authBusy = false;
@@ -868,7 +908,7 @@
     apiRequest('/api/payments/payapp', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ sel: ui.sel, form: ui.form, payMethod: ui.payMethod }),
+      body: JSON.stringify({ sel: ui.sel, form: ui.form, payMethod: ui.payMethod, locale: I.locale }),
     }).then((data) => {
       store.requests = store.requests.concat([data.request]);
       ui.requestBusy = false;
@@ -901,9 +941,9 @@
     apiRequest('/api/admin/requests/' + encodeURIComponent(aq.id) + '/guide', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ title: guide.title, body: guide.body }),
+      body: JSON.stringify({ title: guide.title, body: guide.body, locale: aq.locale || 'ko' }),
     }).then((data) => {
-      store.requests = store.requests.map((q) => (q.id === aq.id ? Object.assign({}, q, { guide: data.guide, status: '가이드 도착' }) : q));
+      store.requests = store.requests.map((q) => (q.id === aq.id ? Object.assign({}, q, { guide: data.guide, status: data.status, statusCode: 'guide_arrived' }) : q));
       ui.adminTitle = '';
       ui.adminBody = '';
       ui.adminBusy = false;
@@ -942,6 +982,19 @@
       .catch(() => { /* offline / not deployed — keep cached/default */ });
   }
 
+  function fetchPaymentConfig() {
+    return fetch('/api/payment-methods', { headers: { Accept: 'application/json' } })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data && Array.isArray(data.enabled)) {
+          enabledPaymentMethods = data.enabled;
+          ui.adminPayments = null;
+          if (currentRoute().name === 'pay' || IS_ADMIN_HOST) render();
+        }
+      })
+      .catch(() => { /* use the locale defaults */ });
+  }
+
   function saveRegions() {
     if (!ui.adminRegions || ui.adminRegions.length === 0) return;
     const btn = document.getElementById('save-regions');
@@ -963,6 +1016,20 @@
         if (btn) btn.disabled = false;
         if (hint) hint.textContent = '저장에 실패했습니다. 다시 시도해 주세요.';
       });
+  }
+
+  function savePayments() {
+    if (!ui.adminPayments || !ui.adminPayments.includes('card')) return;
+    fetch('/api/payment-methods', {
+      method: 'PUT', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: ui.adminPayments }),
+    }).then((r) => (r.ok ? r.json() : Promise.reject(new Error('save_failed'))))
+      .then((data) => {
+        enabledPaymentMethods = data.enabled;
+        ui.adminPaymentsSaved = true;
+        render();
+      })
+      .catch(() => { ui.adminErr = '결제수단 저장에 실패했습니다.'; render(); });
   }
 
   document.addEventListener('click', (e) => {
@@ -1055,6 +1122,7 @@
         break;
       case 'register-guide': registerGuide(); break;
       case 'save-regions': saveRegions(); break;
+      case 'save-payments': savePayments(); break;
       case 'region-add': {
         const id = el.getAttribute('data-region');
         if (D.REGIONS.some((r) => r.id === id) && ui.adminRegions.indexOf(id) < 0) ui.adminRegions = ui.adminRegions.concat([id]);
@@ -1111,10 +1179,37 @@
     }
   });
 
+  document.addEventListener('change', (e) => {
+    const t = e.target;
+    if (t.matches('[data-act="locale"]')) {
+      I.setLocale(t.value);
+      return;
+    }
+    if (t.matches('[data-form]')) {
+      ui.form[t.getAttribute('data-form')] = t.value;
+      if (t.getAttribute('data-form') === 'countryCode') {
+        ui.form.phone = '';
+        render();
+      }
+    }
+    if (t.matches('[data-admin-locale]')) {
+      ui.adminLocale = t.value;
+      ui.adminSel = null;
+      loadAdminRequests();
+    }
+    if (t.matches('[data-admin-payment]')) {
+      const method = t.getAttribute('data-admin-payment');
+      if (t.checked && !ui.adminPayments.includes(method)) ui.adminPayments = ui.adminPayments.concat([method]);
+      if (!t.checked && method !== 'card') ui.adminPayments = ui.adminPayments.filter((item) => item !== method);
+      ui.adminPaymentsSaved = false;
+    }
+  });
+
   // ===== Boot =====
   S.load();
   render();
   if (IS_ADMIN_HOST) loadAdminRequests();
   else refreshSession();
   fetchRegionConfig();
+  fetchPaymentConfig();
 })();

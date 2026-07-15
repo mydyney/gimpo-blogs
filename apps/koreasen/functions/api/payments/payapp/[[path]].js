@@ -1,11 +1,14 @@
 import { json, sameOrigin, readJson } from '../../../_lib/http.js';
 import { requireUser, safeEqual } from '../../../_lib/auth.js';
 import { validSelections, validForm } from '../../../_lib/catalog.js';
+import { validLocale, statusLabel } from '../../../_lib/locale.js';
 
 const PAYAPP_API_URL = 'https://api.payapp.kr/oapi/apiLoad.html';
 const PRICE_WON = 5000;
 
 const PAY_TYPES = {
+  wechat: 'wechat',
+  apple: 'applepay',
   card: 'card',
   kakao: 'kakaopay',
   naver: 'naverpay',
@@ -42,11 +45,24 @@ function envReady(env) {
   return Boolean(env.PAYAPP_USERID && env.PAYAPP_LINKKEY && env.PAYAPP_LINKVAL);
 }
 
+async function allowedPayMethod(env, requested, locale) {
+  const byLocale = { ko: ['card', 'kakao', 'naver', 'payco', 'apple'], en: ['apple', 'card'], ja: ['apple', 'card'], zh: ['wechat', 'card'] };
+  let enabled = Object.keys(PAY_TYPES);
+  try {
+    if (env.SITE_CONFIG) {
+      const stored = await env.SITE_CONFIG.get('enabled_payment_methods', 'json');
+      if (Array.isArray(stored)) enabled = stored;
+    }
+  } catch (error) { /* use defaults */ }
+  const allowed = byLocale[locale] || byLocale.ko;
+  return allowed.includes(requested) && enabled.includes(requested) ? requested : 'card';
+}
+
 function statusForPayState(payState) {
-  if (payState === '4') return { payment: 'paid', request: '가이드 작성 중' };
-  if (payState === '10') return { payment: 'waiting', request: '입금 대기' };
-  if (['8', '9', '32', '64', '70', '71'].includes(payState)) return { payment: 'canceled', request: '결제 취소' };
-  return { payment: 'pending', request: '결제 대기' };
+  if (payState === '4') return { payment: 'paid', code: 'guide_writing' };
+  if (payState === '10') return { payment: 'waiting', code: 'payment_waiting' };
+  if (['8', '9', '32', '64', '70', '71'].includes(payState)) return { payment: 'canceled', code: 'payment_canceled' };
+  return { payment: 'pending', code: 'payment_pending' };
 }
 
 async function createPayment(context) {
@@ -69,7 +85,8 @@ async function createPayment(context) {
   const form = validForm(data.form);
   if (!selections || !form) return json({ ok: false, error: 'invalid_request' }, { status: 400 });
 
-  const payMethod = PAY_TYPES[data.payMethod] ? data.payMethod : 'card';
+  const locale = validLocale(data.locale);
+  const payMethod = await allowedPayMethod(env, PAY_TYPES[data.payMethod] ? data.payMethod : 'card', locale);
   const openpaytype = PAY_TYPES[payMethod];
   const now = Date.now();
   const requestId = 'R-' + crypto.randomUUID();
@@ -80,11 +97,11 @@ async function createPayment(context) {
 
   await env.DB.batch([
     env.DB.prepare(
-      'INSERT INTO travel_requests (id, user_id, selections_json, form_json, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
-    ).bind(requestId, auth.user.id, JSON.stringify(selections), JSON.stringify(form), '결제 대기', now, now),
+      'INSERT INTO travel_requests (id, user_id, selections_json, form_json, status, locale, status_code, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    ).bind(requestId, auth.user.id, JSON.stringify(selections), JSON.stringify(form), statusLabel('payment_pending', 'ko'), locale, 'payment_pending', now, now),
     env.DB.prepare(
-      'INSERT INTO payments (id, request_id, user_id, provider, amount, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
-    ).bind(paymentId, requestId, auth.user.id, 'payapp', PRICE_WON, 'pending', now, now),
+      'INSERT INTO payments (id, request_id, user_id, provider, amount, status, method_requested, country_code, locale, currency, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    ).bind(paymentId, requestId, auth.user.id, 'payapp', PRICE_WON, 'pending', payMethod, form.countryCode, locale, 'KRW', now, now),
   ]);
 
   const postData = formBody({
@@ -93,6 +110,7 @@ async function createPayment(context) {
     goodname: 'mytokyomate 여행 계획 요청',
     price: PRICE_WON,
     recvphone: form.phone,
+    vccode: form.countryCode,
     recvemail: auth.user.email,
     memo: 'mytokyomate 맞춤 여행 계획',
     reqaddr: '0',
@@ -121,8 +139,8 @@ async function createPayment(context) {
     await env.DB.batch([
       env.DB.prepare('UPDATE payments SET status = ?, raw_json = ?, updated_at = ? WHERE id = ?')
         .bind('failed', JSON.stringify(result), Date.now(), paymentId),
-      env.DB.prepare('UPDATE travel_requests SET status = ?, updated_at = ? WHERE id = ?')
-        .bind('결제 실패', Date.now(), requestId),
+      env.DB.prepare('UPDATE travel_requests SET status = ?, status_code = ?, updated_at = ? WHERE id = ?')
+        .bind(statusLabel('payment_failed', 'ko'), 'payment_failed', Date.now(), requestId),
     ]);
     return json({ ok: false, error: result.errorMessage || 'payapp_request_failed' }, { status: 502 });
   }
@@ -134,7 +152,7 @@ async function createPayment(context) {
   return json({
     ok: true,
     payurl: result.payurl,
-    request: { id: requestId, email: auth.user.email, sel: selections, form, status: '결제 대기', guide: null, createdAt: now },
+    request: { id: requestId, email: auth.user.email, sel: selections, form, locale, statusCode: 'payment_pending', status: statusLabel('payment_pending', locale), guide: null, createdAt: now },
   }, { status: 201 });
 }
 
@@ -152,7 +170,7 @@ async function handleFeedback(context) {
   const paymentId = data.var2 || '';
   const mulNo = data.mul_no || '';
   const row = await env.DB.prepare(
-    'SELECT p.id, p.request_id, p.amount, p.provider_payment_id FROM payments p WHERE p.id = ? AND p.request_id = ? AND p.provider = ?'
+    'SELECT p.id, p.request_id, p.amount, p.provider_payment_id, p.method_requested, p.locale FROM payments p WHERE p.id = ? AND p.request_id = ? AND p.provider = ?'
   ).bind(paymentId, requestId, 'payapp').first();
   if (!row) return new Response('FAIL', { status: 404 });
 
@@ -164,12 +182,15 @@ async function handleFeedback(context) {
   if (!authOk) return new Response('FAIL', { status: 403 });
 
   const mapped = statusForPayState(String(data.pay_state || ''));
+  const expectedPayTypes = { card: '1', kakao: '15', naver: '16', payco: '20', wechat: '22', apple: '23' };
+  const payType = String(data.pay_type || '');
+  const mismatch = Boolean(payType && expectedPayTypes[row.method_requested] && payType !== expectedPayTypes[row.method_requested]);
   await env.DB.batch([
     env.DB.prepare(
-      'UPDATE payments SET provider_payment_id = COALESCE(provider_payment_id, ?), status = ?, pay_state = ?, receipt_url = ?, raw_json = ?, updated_at = ? WHERE id = ?'
-    ).bind(mulNo, mapped.payment, String(data.pay_state || ''), data.csturl || '', JSON.stringify(data), Date.now(), row.id),
-    env.DB.prepare('UPDATE travel_requests SET status = ?, updated_at = ? WHERE id = ?')
-      .bind(mapped.request, Date.now(), requestId),
+      'UPDATE payments SET provider_payment_id = COALESCE(provider_payment_id, ?), status = ?, pay_state = ?, pay_type = ?, method_mismatch = ?, receipt_url = ?, raw_json = ?, updated_at = ? WHERE id = ?'
+    ).bind(mulNo, mapped.payment, String(data.pay_state || ''), payType, mismatch ? 1 : 0, data.csturl || '', JSON.stringify(data), Date.now(), row.id),
+    env.DB.prepare('UPDATE travel_requests SET status = ?, status_code = ?, updated_at = ? WHERE id = ?')
+      .bind(statusLabel(mapped.code, 'ko'), mapped.code, Date.now(), requestId),
   ]);
 
   return new Response('SUCCESS', {

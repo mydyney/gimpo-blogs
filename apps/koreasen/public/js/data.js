@@ -76,25 +76,42 @@
   ];
 
   const PAY_METHODS = [
-    { id: 'card', ko: '신용·체크카드', en: 'CARD' },
-    { id: 'kakao', ko: '카카오페이', en: 'KAKAO PAY' },
-    { id: 'naver', ko: '네이버페이', en: 'NAVER PAY' },
-    { id: 'payco', ko: '페이코', en: 'PAYCO' },
+    { id: 'wechat', payapp: 'wechat', ko: '위챗페이', en: 'WECHAT PAY', ja: 'WeChat Pay', zh: '微信支付', locales: ['zh'] },
+    { id: 'apple', payapp: 'applepay', ko: '애플페이', en: 'APPLE PAY', ja: 'Apple Pay', zh: 'Apple Pay', locales: ['ko', 'en', 'ja'] },
+    { id: 'card', payapp: 'card', ko: '신용·체크카드', en: 'CARD', ja: 'クレジットカード', zh: '信用卡', locales: ['ko', 'en', 'ja', 'zh'] },
+    { id: 'kakao', payapp: 'kakaopay', ko: '카카오페이', en: 'KAKAO PAY', ja: 'Kakao Pay', zh: 'Kakao Pay', locales: ['ko'] },
+    { id: 'naver', payapp: 'naverpay', ko: '네이버페이', en: 'NAVER PAY', ja: 'Naver Pay', zh: 'Naver Pay', locales: ['ko'] },
+    { id: 'payco', payapp: 'payco', ko: '페이코', en: 'PAYCO', ja: 'PAYCO', zh: 'PAYCO', locales: ['ko'] },
   ];
 
+  const option = (value, ko, en, ja, zh) => ({ value, ko, en, ja, zh });
   const FORM_OPTIONS = {
-    count: ['1명', '2명', '3명', '4명', '5명', '6명 이상'],
-    group: ['혼자', '커플 · 부부', '친구', '가족 (아이 동반)', '가족 (부모님 동반)', '회사 · 단체'],
-    duration: ['2박 3일', '3박 4일', '4박 5일', '5박 6일', '일주일 이상'],
-    budget: ['~50만원', '50~100만원', '100~200만원', '200만원 이상', '미정'],
+    count: [option('count_1', '1명', '1 person', '1名', '1人'), option('count_2', '2명', '2 people', '2名', '2人'), option('count_3', '3명', '3 people', '3名', '3人'), option('count_4', '4명', '4 people', '4名', '4人'), option('count_5', '5명', '5 people', '5名', '5人'), option('count_6_plus', '6명 이상', '6+ people', '6名以上', '6人以上')],
+    group: [option('solo', '혼자', 'Solo', 'ひとり', '独自出行'), option('couple', '커플 · 부부', 'Couple', 'カップル・夫婦', '情侣·夫妻'), option('friends', '친구', 'Friends', '友人', '朋友'), option('family_children', '가족 (아이 동반)', 'Family with children', '家族（子ども同伴）', '家庭（带孩子）'), option('family_parents', '가족 (부모님 동반)', 'Family with parents', '家族（両親同伴）', '家庭（带父母）'), option('company', '회사 · 단체', 'Company/group', '会社・グループ', '公司·团体')],
+    duration: [option('nights_2', '2박 3일', '3 days / 2 nights', '2泊3日', '3天2晚'), option('nights_3', '3박 4일', '4 days / 3 nights', '3泊4日', '4天3晚'), option('nights_4', '4박 5일', '5 days / 4 nights', '4泊5日', '5天4晚'), option('nights_5', '5박 6일', '6 days / 5 nights', '5泊6日', '6天5晚'), option('week_plus', '일주일 이상', '1 week or more', '1週間以上', '一周或以上')],
+    budget: [option('under_500k', '~50만원', 'Under ₩500K', '50万ウォン以下', '50万韩元以下'), option('500k_1m', '50~100만원', '₩500K–1M', '50〜100万ウォン', '50–100万韩元'), option('1m_2m', '100~200만원', '₩1M–2M', '100〜200万ウォン', '100–200万韩元'), option('over_2m', '200만원 이상', 'Over ₩2M', '200万ウォン以上', '200万韩元以上'), option('undecided', '미정', 'Not decided', '未定', '待定')],
   };
+
+  function optionLabel(group, value, locale) {
+    const found = (FORM_OPTIONS[group] || []).find((item) => item.value === value || item.ko === value);
+    return found ? (found[locale] || found.en || found.ko) : value;
+  }
+
+  function paymentMethods(locale, enabled, appleAvailable) {
+    const allowed = Array.isArray(enabled) ? enabled : PAY_METHODS.map((item) => item.id);
+    const order = locale === 'zh' ? ['wechat', 'card'] : locale === 'ko' ? ['card', 'kakao', 'naver', 'payco', 'apple'] : ['apple', 'card'];
+    return order.map((id) => PAY_METHODS.find((item) => item.id === id))
+      .filter((item) => item && item.locales.includes(locale) && allowed.includes(item.id) && (item.id !== 'apple' || appleAvailable));
+  }
 
   global.MTM_DATA = {
     REGIONS,
     SPOTS,
     MAP_MARKERS,
     PAY_METHODS,
+    paymentMethods,
     FORM_OPTIONS,
+    optionLabel,
     PRICE_WON: 5000,
     LS_KEY: 'mtm_proto_v1',
   };
