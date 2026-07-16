@@ -31,10 +31,10 @@ function safeEqual(a, b) {
 }
 
 const META = {
-  ko: { lang: 'ko', og: 'ko_KR', title: 'mytokyomate | 일본 여행 계획 컨시어지', description: '도쿄메이트가 동선까지 계산한 맞춤 일본 여행 일정을 만들어 드립니다.' },
-  en: { lang: 'en', og: 'en_US', title: 'mytokyomate | Personal Japan Travel Planning', description: 'Get a personalized Japan itinerary planned by a Tokyo local, including efficient routes and selected destinations.' },
-  ja: { lang: 'ja', og: 'ja_JP', title: 'mytokyomate | 日本旅行プランコンシェルジュ', description: '東京を知り尽くしたメイトが、あなただけの日本旅行プランを作成します。' },
-  zh: { lang: 'zh-CN', og: 'zh_CN', title: 'mytokyomate | 日本旅行行程定制', description: '由熟悉东京的当地旅行达人为您定制日本行程。' },
+  ko: { lang: 'ko', og: 'ko_KR', title: 'mytokyomate | 일본 여행 계획 컨시어지', description: '도쿄메이트가 동선까지 계산한 맞춤 일본 여행 일정을 만들어 드립니다.', image: '/og-ko.jpg', imageAlt: 'mytokyomate — 도쿄메이트가 짜 주는 일본 여행 일정' },
+  en: { lang: 'en', og: 'en_US', title: 'mytokyomate | Personal Japan Travel Planning', description: 'Get a personalized Japan itinerary planned by a Tokyo local, including efficient routes and selected destinations.', image: '/og-en.jpg', imageAlt: 'mytokyomate — a Tokyo local plans your Japan itinerary' },
+  ja: { lang: 'ja', og: 'ja_JP', title: 'mytokyomate | 日本旅行プランコンシェルジュ', description: '東京を知り尽くしたメイトが、あなただけの日本旅行プランを作成します。', image: '/og-ja.jpg', imageAlt: 'mytokyomate — 東京を知り尽くしたメイトが作る日本旅行プラン' },
+  zh: { lang: 'zh-CN', og: 'zh_CN', title: 'mytokyomate | 日本旅行行程定制', description: '由熟悉东京的当地旅行达人为您定制日本行程。', image: '/og-zh.jpg', imageAlt: 'mytokyomate — 熟悉东京的当地达人为您定制日本行程' },
 };
 
 async function harden(response, request) {
@@ -46,6 +46,7 @@ async function harden(response, request) {
     const locale = match ? match[1] : 'ko';
     const meta = META[locale];
     const canonical = url.origin + '/' + locale + (url.pathname.replace(/^\/(ko|en|ja|zh)(?=\/|$)/, '') || '/');
+    const image = url.origin + meta.image;
     let html = await response.text();
     html = html.replace(/<html lang="[^"]+">/, '<html lang="' + meta.lang + '">')
       .replace(/<title>[^<]*<\/title>/, '<title>' + meta.title + '</title>')
@@ -54,7 +55,13 @@ async function harden(response, request) {
       .replace(/<meta property="og:locale" content="[^"]*"\/>/, '<meta property="og:locale" content="' + meta.og + '"/>')
       .replace(/<meta property="og:url" content="[^"]*"\/>/, '<meta property="og:url" content="' + canonical + '"/>')
       .replace(/<meta property="og:title" content="[^"]*"\/>/, '<meta property="og:title" content="' + meta.title + '"/>')
-      .replace(/<meta property="og:description" content="[^"]*"\/>/, '<meta property="og:description" content="' + meta.description + '"/>');
+      .replace(/<meta property="og:description" content="[^"]*"\/>/, '<meta property="og:description" content="' + meta.description + '"/>')
+      .replace(/<meta property="og:image" content="[^"]*"\/>/, '<meta property="og:image" content="' + image + '"/>')
+      .replace(/<meta property="og:image:secure_url" content="[^"]*"\/>/, '<meta property="og:image:secure_url" content="' + image + '"/>')
+      .replace(/<meta property="og:image:alt" content="[^"]*"\/>/, '<meta property="og:image:alt" content="' + meta.imageAlt + '"/>')
+      .replace(/<meta name="twitter:title" content="[^"]*"\/>/, '<meta name="twitter:title" content="' + meta.title + '"/>')
+      .replace(/<meta name="twitter:description" content="[^"]*"\/>/, '<meta name="twitter:description" content="' + meta.description + '"/>')
+      .replace(/<meta name="twitter:image" content="[^"]*"\/>/, '<meta name="twitter:image" content="' + image + '"/>');
     hardened = new Response(html, response);
   } else {
     hardened = new Response(response.body, response);

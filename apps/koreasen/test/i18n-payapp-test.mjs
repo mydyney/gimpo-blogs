@@ -24,4 +24,10 @@ assert.match(paymentSource, /vccode:\s*form\.countryCode/);
 assert.match(paymentSource, /pay_type/);
 assert.match(paymentSource, /method_mismatch/);
 
+const middlewareSource = await readFile(new URL('../functions/_middleware.js', import.meta.url), 'utf8');
+for (const locale of ['ko', 'en', 'ja', 'zh']) {
+  assert.match(middlewareSource, new RegExp(`/og-${locale}\\.jpg`));
+}
+assert.match(middlewareSource, /twitter:image/);
+
 console.log('PASS i18n + PayApp: stable codes, international phones, localized statuses, WeChat/Apple callback tracking');

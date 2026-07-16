@@ -4,10 +4,10 @@
 
   const LOCALES = ['ko', 'en', 'ja', 'zh'];
   const META = {
-    ko: { name: '한국어', html: 'ko', og: 'ko_KR', title: 'mytokyomate | 일본 여행 계획 컨시어지', description: '도쿄메이트가 동선까지 계산한 맞춤 일본 여행 일정을 만들어 드립니다.' },
-    en: { name: 'English', html: 'en', og: 'en_US', title: 'mytokyomate | Personal Japan Travel Planning', description: 'Get a personalized Japan itinerary planned by a Tokyo local, including efficient routes and selected destinations.' },
-    ja: { name: '日本語', html: 'ja', og: 'ja_JP', title: 'mytokyomate | 日本旅行プランコンシェルジュ', description: '東京を知り尽くしたメイトが、移動動線まで考えたあなただけの日本旅行プランを作成します。' },
-    zh: { name: '简体中文', html: 'zh-CN', og: 'zh_CN', title: 'mytokyomate | 日本旅行行程定制', description: '由熟悉东京的当地旅行达人为您定制日本行程，并优化每日路线。' },
+    ko: { name: '한국어', html: 'ko', og: 'ko_KR', title: 'mytokyomate | 일본 여행 계획 컨시어지', description: '도쿄메이트가 동선까지 계산한 맞춤 일본 여행 일정을 만들어 드립니다.', image: '/og-ko.jpg', imageAlt: 'mytokyomate — 도쿄메이트가 짜 주는 일본 여행 일정' },
+    en: { name: 'English', html: 'en', og: 'en_US', title: 'mytokyomate | Personal Japan Travel Planning', description: 'Get a personalized Japan itinerary planned by a Tokyo local, including efficient routes and selected destinations.', image: '/og-en.jpg', imageAlt: 'mytokyomate — a Tokyo local plans your Japan itinerary' },
+    ja: { name: '日本語', html: 'ja', og: 'ja_JP', title: 'mytokyomate | 日本旅行プランコンシェルジュ', description: '東京を知り尽くしたメイトが、移動動線まで考えたあなただけの日本旅行プランを作成します。', image: '/og-ja.jpg', imageAlt: 'mytokyomate — 東京を知り尽くしたメイトが作る日本旅行プラン' },
+    zh: { name: '简体中文', html: 'zh-CN', og: 'zh_CN', title: 'mytokyomate | 日本旅行行程定制', description: '由熟悉东京的当地旅行达人为您定制日本行程，并优化每日路线。', image: '/og-zh.jpg', imageAlt: 'mytokyomate — 熟悉东京的当地达人为您定制日本行程' },
   };
 
   const UI = {
@@ -162,6 +162,7 @@
     document.documentElement.lang = meta.html;
     document.title = meta.title;
     const canonical = 'https://mytokyomate.com' + href(routePath(location.pathname));
+    const image = 'https://mytokyomate.com' + meta.image;
     const set = (selector, attr, value) => { const el = document.querySelector(selector); if (el) el.setAttribute(attr, value); };
     set('meta[name="description"]', 'content', meta.description);
     set('link[rel="canonical"]', 'href', canonical);
@@ -169,8 +170,12 @@
     set('meta[property="og:url"]', 'content', canonical);
     set('meta[property="og:title"]', 'content', meta.title);
     set('meta[property="og:description"]', 'content', meta.description);
+    set('meta[property="og:image"]', 'content', image);
+    set('meta[property="og:image:secure_url"]', 'content', image);
+    set('meta[property="og:image:alt"]', 'content', meta.imageAlt);
     set('meta[name="twitter:title"]', 'content', meta.title);
     set('meta[name="twitter:description"]', 'content', meta.description);
+    set('meta[name="twitter:image"]', 'content', image);
   }
   function localizeDocument(root) {
     updateMeta();
