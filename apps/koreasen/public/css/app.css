@@ -626,6 +626,18 @@ button { font-family: inherit; }
 
 .status-badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 3px; background: var(--pale-blue); color: var(--text-primary); }
 .status-badge.arrived { background: var(--mint); color: #fff; }
+.payment-retry-badge {
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+}
+.payment-retry-badge:hover:not(:disabled), .payment-retry-badge:focus-visible {
+  border-color: var(--cta-green);
+  color: var(--cta-green);
+}
+.payment-retry-badge:disabled { cursor: wait; opacity: .65; }
+.retry-payment-btn { min-width: 124px; justify-content: center; }
+.rq-payment-error { margin-top: 8px; color: #b42318; font-size: 12px; font-weight: 700; line-height: 1.5; }
 
 /* ===== Guide detail ===== */
 .back-btn {
@@ -849,6 +861,9 @@ button { font-family: inherit; }
   .done .dn-en { font-size: 42px; }
   .done .dn-actions { flex-direction: column; align-items: stretch; }
   .done .dn-actions .btn { width: 100%; }
+
+  .req-card { align-items: stretch; flex-direction: column; }
+  .retry-payment-btn { width: 100%; }
 
   .site-footer .inner { padding: 36px 20px; flex-direction: column; align-items: flex-start; gap: 28px; line-height: 1.6; }
   .site-footer .ft-sub { max-width: 310px; word-break: keep-all; }

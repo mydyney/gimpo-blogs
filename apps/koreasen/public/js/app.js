@@ -35,7 +35,7 @@
     form: { count: 'count_2', group: 'couple', countryCode: I.locale === 'zh' ? '86' : (I.locale === 'ja' ? '81' : '82'), phone: '', date: '', duration: 'nights_3', budget: '1m_2m', lodging: '', notes: '' },
     payMethod: I.locale === 'zh' ? 'wechat' : ((I.locale === 'en' || I.locale === 'ja') ? 'apple' : 'card'),
     emailInput: '', authName: '', authCode: '', authStep: 'email', authPurpose: '', authErr: '', authBusy: false, afterLogin: null,
-    requestBusy: false, requestErr: '', adminBusy: false, adminErr: '',
+    requestBusy: false, requestErr: '', retryBusyId: '', retryErrId: '', retryErr: '', adminBusy: false, adminErr: '',
     notifOpen: false, mobileMenuOpen: false,
     adminSel: null, adminTitle: '', adminBody: '', adminLocale: 'all',
     adminRegions: null, adminRegionsSaved: false,
@@ -631,21 +631,30 @@
     } else {
       list =
         '<div class="req-list">' +
-        myReqs.map((q) =>
+        myReqs.map((q) => {
+          const retryable = ['payment_pending', 'payment_failed', 'payment_canceled'].includes(q.statusCode);
+          const retryBusy = ui.retryBusyId === q.id;
+          return (
           '<div class="req-card">' +
           '<div class="rq-main">' +
           '<div class="rq-head">' +
           '<span class="rq-id">' + esc(q.id) + '</span>' +
-          '<span class="status-badge' + (q.statusCode === 'guide_arrived' ? ' arrived' : '') + '">' + esc(q.status) + '</span>' +
+          (retryable
+            ? '<button class="status-badge payment-retry-badge" data-act="retry-payment" data-id="' + esc(q.id) + '" title="' + I.t('retryPayment') + '"' + (retryBusy ? ' disabled' : '') + '>' + esc(q.status) + '</button>'
+            : '<span class="status-badge' + (q.statusCode === 'guide_arrived' ? ' arrived' : '') + '">' + esc(q.status) + '</span>') +
           '</div>' +
           '<div class="rq-spots">' + esc(S.selLabel(q.sel)) + '</div>' +
           '<div class="rq-meta">' + esc(S.metaLabel(q.form) + ' · ' + S.fmtWhen(q.createdAt) + ' 접수') + '</div>' +
+          (ui.retryErrId === q.id ? '<div class="rq-payment-error">' + esc(ui.retryErr) + '</div>' : '') +
           '</div>' +
           (q.guide
             ? '<a class="btn btn-square" href="/guide/' + esc(q.id) + '" data-nav><span class="arrow">▶</span>가이드 보기</a>'
-            : '<span class="rq-waiting">메이트가 작성 중입니다</span>') +
+            : retryable
+              ? '<button class="btn btn-square retry-payment-btn" data-act="retry-payment" data-id="' + esc(q.id) + '"' + (retryBusy ? ' disabled' : '') + '><span class="arrow">▶</span>' + (retryBusy ? I.t('preparingPayment') : I.t('retryPayment')) + '</button>'
+              : '<span class="rq-waiting">메이트가 작성 중입니다</span>') +
           '</div>'
-        ).join('') +
+          );
+        }).join('') +
         '</div>';
     }
 
@@ -930,6 +939,39 @@
     });
   }
 
+  function retryPayment(requestId) {
+    if (!store.user || ui.retryBusyId) return;
+    const target = store.requests.find((q) => q.id === requestId);
+    if (!target || !['payment_pending', 'payment_failed', 'payment_canceled'].includes(target.statusCode)) return;
+    ui.retryBusyId = requestId;
+    ui.retryErrId = '';
+    ui.retryErr = '';
+    render();
+    apiRequest('/api/payments/payapp/retry', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({ requestId, payMethod: ui.payMethod, locale: target.locale || I.locale }),
+    }).then((data) => {
+      store.requests = store.requests.map((q) => (q.id === requestId
+        ? Object.assign({}, q, { statusCode: 'payment_pending', status: data.status || I.phrase('결제 대기') })
+        : q));
+      ui.retryBusyId = '';
+      location.href = data.payurl;
+    }).catch((error) => {
+      ui.retryBusyId = '';
+      ui.retryErrId = requestId;
+      const retryErrors = {
+        unauthorized: I.phrase('로그인이 만료되었습니다. 다시 로그인해 주세요.'),
+        payment_not_retryable: I.phrase('이미 결제가 완료되었거나 다시 결제할 수 없는 요청입니다.'),
+        payapp_not_configured: I.phrase('결제 설정을 확인하는 중입니다. 잠시 후 다시 시도해 주세요.'),
+        payapp_unreachable: I.phrase('PayApp에 연결하지 못했습니다. 잠시 후 다시 시도해 주세요.'),
+      };
+      ui.retryErr = retryErrors[error.message] || I.phrase('결제창을 다시 열지 못했습니다. 잠시 후 다시 시도해 주세요.');
+      if (error.message === 'unauthorized') { store.user = null; ui.afterLogin = '/my'; navigate('/login'); }
+      else render();
+    });
+  }
+
   function registerGuide() {
     const aq = store.requests.find((q) => q.id === ui.adminSel);
     if (!aq || aq.guide || ui.adminBusy) return;
@@ -1111,6 +1153,7 @@
         if (phoneIncomplete()) break;
         doPay();
         break;
+      case 'retry-payment': retryPayment(el.getAttribute('data-id')); break;
       case 'login-submit': submitLogin(); break;
       case 'signup-submit': submitSignup(); break;
       case 'auth-back': ui.authStep = 'email'; ui.authPurpose = ''; ui.authCode = ''; ui.authErr = ''; render(); break;

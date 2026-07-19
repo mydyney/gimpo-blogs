@@ -23,6 +23,18 @@ assert.match(paymentSource, /apple:\s*'applepay'/);
 assert.match(paymentSource, /vccode:\s*form\.countryCode/);
 assert.match(paymentSource, /pay_type/);
 assert.match(paymentSource, /method_mismatch/);
+assert.match(paymentSource, /RETRYABLE_REQUEST_STATES/);
+assert.match(paymentSource, /rest\[0\] === 'retry'/);
+assert.match(paymentSource, /NOT EXISTS \(\s*SELECT 1 FROM payments WHERE request_id = \? AND status = 'paid'/);
+
+const retryMigration = await readFile(new URL('../migrations/0005_payment_retries.sql', import.meta.url), 'utf8');
+assert.match(retryMigration, /DROP INDEX IF EXISTS idx_payments_request_provider/);
+assert.match(retryMigration, /CREATE INDEX IF NOT EXISTS idx_payments_request_provider/);
+assert.doesNotMatch(retryMigration, /CREATE UNIQUE INDEX[\s\S]*idx_payments_request_provider/);
+
+const appSource = await readFile(new URL('../public/js/app.js', import.meta.url), 'utf8');
+assert.match(appSource, /data-act="retry-payment"/);
+assert.match(appSource, /api\/payments\/payapp\/retry/);
 
 const middlewareSource = await readFile(new URL('../functions/_middleware.js', import.meta.url), 'utf8');
 for (const locale of ['ko', 'en', 'ja', 'zh']) {
@@ -30,4 +42,4 @@ for (const locale of ['ko', 'en', 'ja', 'zh']) {
 }
 assert.match(middlewareSource, /twitter:image/);
 
-console.log('PASS i18n + PayApp: stable codes, international phones, localized statuses, WeChat/Apple callback tracking');
+console.log('PASS i18n + PayApp: stable codes, international phones, localized statuses, payment retry and callback tracking');
