@@ -263,13 +263,13 @@
       '</div>' +
       '<div class="hl-grid">' +
       highlights.map((s, i) =>
-        '<div class="hl-card">' +
-        '<div class="hl-img">' + spotPhoto(s.id, contentName(s)) + '</div>' +
-        '<button class="hl-body" data-act="go-plan-tokyo">' +
+        '<button class="hl-card" type="button" data-act="go-plan-spot" data-region="tokyo" data-spot="' + s.id + '" aria-label="' + esc(I.phrase(contentName(s) + ' 선택')) + '">' +
+        '<span class="hl-img">' + spotPhoto(s.id, contentName(s)) + '</span>' +
+        '<span class="hl-body">' +
         '<span class="hl-name">' + esc(contentName(s)) + '</span>' +
         '<span class="hl-cat">' + esc(I.category(s.cat)) + '</span>' +
-        '</button>' +
-        '</div>'
+        '</span>' +
+        '</button>'
       ).join('') +
       '</div>' +
       '</section>' +
@@ -1117,6 +1117,16 @@
       case 'go-my': navigate('/my'); break;
       case 'go-plan-tokyo': ui.region = 'tokyo'; navigate('/plan'); break;
       case 'go-plan-region': ui.region = el.getAttribute('data-region'); navigate('/plan'); break;
+      case 'go-plan-spot': {
+        const regionId = el.getAttribute('data-region');
+        const spotId = el.getAttribute('data-spot');
+        ui.region = regionId;
+        if (!ui.sel.some((x) => x.regionId === regionId && x.spotId === spotId)) {
+          ui.sel = ui.sel.concat([{ regionId, spotId }]);
+        }
+        navigate('/plan');
+        break;
+      }
       case 'pick-region': ui.region = el.getAttribute('data-region'); render(); break;
       case 'map-spot': {
         const regionId = el.getAttribute('data-region');
