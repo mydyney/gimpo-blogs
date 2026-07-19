@@ -38,12 +38,12 @@
     check('cta disabled when none selected', document.querySelector('[data-act="go-info"]').disabled === true);
 
     // 2. select two spots + one from a sub region
-    click('.spot-card:nth-child(1) .sp-body');
-    click('.spot-card:nth-child(3) .sp-body');
+    click('.spot-card:nth-child(1) .sp-img img');
+    click('.spot-card:nth-child(3)');
     check('order badges', document.querySelectorAll('.sp-order').length === 2);
     click('[data-act="pick-region"][data-region="kansai"]');
     check('kansai spots', document.querySelectorAll('.spot-card').length === 6);
-    click('.spot-card:nth-child(1) .sp-body');
+    click('.spot-card:nth-child(1) .sp-img img');
     check('3 chips', document.querySelectorAll('.sel-chip').length === 3);
     check('region count badge', !!document.querySelector('.region-tile .rt-count'));
 

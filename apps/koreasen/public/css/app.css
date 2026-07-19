@@ -465,13 +465,21 @@ button { font-family: inherit; }
 .spots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 18px; }
 
 .spot-card {
+  display: block;
+  width: 100%;
+  padding: 0;
   text-align: left;
   background: #fff;
   border: 2px solid #e5e5e5;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
   position: relative;
-  transition: border-color 0.2s ease;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 .spot-card.selected { border-color: var(--mint); }
+.spot-card:hover, .spot-card:focus-visible { border-color: var(--mint); box-shadow: 0 0 0 2px rgba(0, 157, 61, .12); outline: none; }
 .spot-card .sp-order {
   position: absolute;
   top: 8px;
@@ -487,18 +495,15 @@ button { font-family: inherit; }
   justify-content: center;
   z-index: 2;
 }
-.spot-card .sp-img { height: 96px; position: relative; }
+.spot-card .sp-img { display: block; height: 96px; position: relative; }
 .spot-card .sp-body {
   display: block;
   width: 100%;
   text-align: left;
-  background: none;
-  border: none;
-  cursor: pointer;
   padding: 12px 12px 14px;
   transition: background-color 0.2s ease;
 }
-.spot-card .sp-body:hover { background: var(--pale-mist); }
+.spot-card:hover .sp-body { background: var(--pale-mist); }
 .spot-card .sp-name { display: block; font-weight: 700; font-size: 14px; }
 .spot-card .sp-cat { display: block; font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 

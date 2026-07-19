@@ -349,14 +349,14 @@
       const idx = ui.sel.findIndex((x) => x.regionId === ui.region && x.spotId === sp.id);
       const selected = idx >= 0;
       return (
-        '<div class="spot-card' + (selected ? ' selected' : '') + '">' +
+        '<button class="spot-card' + (selected ? ' selected' : '') + '" type="button" title="' + esc(I.phrase('눌러서 선택 · 해제')) + '" data-act="toggle-spot" data-spot="' + sp.id + '" aria-pressed="' + selected + '">' +
         (selected ? '<span class="sp-order">' + (idx + 1) + '</span>' : '') +
-        '<div class="sp-img">' + spotPhoto(sp.id, contentName(sp)) + '</div>' +
-        '<button class="sp-body" title="눌러서 선택 · 해제" data-act="toggle-spot" data-spot="' + sp.id + '">' +
+        '<span class="sp-img">' + spotPhoto(sp.id, contentName(sp)) + '</span>' +
+        '<span class="sp-body">' +
         '<span class="sp-name">' + esc(contentName(sp)) + '</span>' +
         '<span class="sp-cat">' + esc(I.category(sp.cat)) + '</span>' +
-        '</button>' +
-        '</div>'
+        '</span>' +
+        '</button>'
       );
     }).join('');
 
