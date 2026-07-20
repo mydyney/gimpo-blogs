@@ -1,4 +1,4 @@
-// mytokyomate — SPA router + views (vanilla JS)
+// mytokyomate — SPA router + views (vanilla JS, PayApp wallet support)
 (function () {
   'use strict';
 
@@ -32,7 +32,7 @@
     region: 'tokyo',
     sel: [],                                   // [{regionId, spotId}]
     form: { count: 'count_2', group: 'couple', countryCode: I.locale === 'zh' ? '86' : (I.locale === 'ja' ? '81' : '82'), phone: '', date: '', duration: 'nights_3', budget: '1m_2m', lodging: '', notes: '' },
-    payMethod: 'card',
+    payMethod: I.locale === 'zh' ? 'wechat' : ((I.locale === 'en' || I.locale === 'ja') ? 'apple' : 'card'),
     emailInput: '', authName: '', authCode: '', authStep: 'email', authPurpose: '', authErr: '', authBusy: false, afterLogin: null,
     requestBusy: false, requestErr: '', retryBusyId: '', retryErrId: '', retryErr: '', adminBusy: false, adminErr: '',
     notifOpen: false, mobileMenuOpen: false,
@@ -461,7 +461,8 @@
       ['숙소 선호', f.lodging || '특별한 선호 없음'],
       ['요청사항', f.notes || '없음'],
     ];
-    const methods = D.paymentMethods();
+    const appleAvailable = Boolean(window.ApplePaySession && window.ApplePaySession.canMakePayments && window.ApplePaySession.canMakePayments());
+    const methods = D.paymentMethods(I.locale, appleAvailable);
     if (!methods.some((m) => m.id === ui.payMethod)) ui.payMethod = methods.length ? methods[0].id : 'card';
     const methodObj = methods.find((m) => m.id === ui.payMethod) || methods[0] || D.PAY_METHODS.find((m) => m.id === 'card');
     const disabled = ui.requestBusy || phoneIncomplete();
@@ -720,11 +721,13 @@
   }
 
   function viewPaymentSettings() {
-    const method = D.PAY_METHODS[0];
+    const methods = D.PAY_METHODS.map((method) =>
+      '<label class="payment-toggle"><input type="checkbox" checked disabled>' +
+      '<span><b>' + esc(method.en) + '</b><small>' + esc(method.ko) + ' · 활성</small></span></label>'
+    ).join('');
     return '<div class="admin-regions admin-payments"><div class="ar-title">PayApp 결제수단</div>' +
-      '<div class="ar-desc">PG사 정책에 따라 신용·체크카드 결제만 사용합니다.</div>' +
-      '<div class="payment-toggle-grid"><label class="payment-toggle"><input type="checkbox" checked disabled>' +
-      '<span><b>' + esc(method.en) + '</b><small>' + esc(method.ko) + ' · 고정</small></span></label></div></div>';
+      '<div class="ar-desc">카드는 전체 언어, Apple Pay는 영어·일본어, WeChat Pay는 중국어에서 제공합니다.</div>' +
+      '<div class="payment-toggle-grid">' + methods + '</div></div>';
   }
 
   function viewAdmin() {

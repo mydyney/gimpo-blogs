@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import vm from 'node:vm';
 import { validForm } from '../functions/_lib/catalog.js';
 import { statusLabel, validLocale } from '../functions/_lib/locale.js';
 
@@ -18,9 +19,13 @@ assert.equal(validLocale('fr'), 'ko');
 assert.equal(statusLabel('guide_arrived', 'ja'), 'ガイド完成');
 
 const paymentSource = await readFile(new URL('../functions/api/payments/payapp/[[path]].js', import.meta.url), 'utf8');
-assert.match(paymentSource, /PAYMENT_METHOD\s*=\s*'card'/);
-assert.doesNotMatch(paymentSource, /kakaopay|naverpay|applepay|wechat/);
-assert.match(paymentSource, /openpaytype:\s*PAYMENT_METHOD/);
+assert.match(paymentSource, /apple:\s*'applepay'/);
+assert.match(paymentSource, /wechat:\s*'wechat'/);
+assert.match(paymentSource, /en:\s*\['apple',\s*'card'\]/);
+assert.match(paymentSource, /ja:\s*\['apple',\s*'card'\]/);
+assert.match(paymentSource, /zh:\s*\['wechat',\s*'card'\]/);
+assert.doesNotMatch(paymentSource, /kakaopay|naverpay|payco/);
+assert.match(paymentSource, /openpaytype:\s*PAY_TYPES\[payMethod\]/);
 assert.match(paymentSource, /vccode:\s*form\.countryCode/);
 assert.match(paymentSource, /pay_type/);
 assert.match(paymentSource, /method_mismatch/);
@@ -33,13 +38,23 @@ assert.match(retryMigration, /DROP INDEX IF EXISTS idx_payments_request_provider
 assert.match(retryMigration, /CREATE INDEX IF NOT EXISTS idx_payments_request_provider/);
 assert.doesNotMatch(retryMigration, /CREATE UNIQUE INDEX[\s\S]*idx_payments_request_provider/);
 
-const appSource = await readFile(new URL('../public/js/app-20260720a.js', import.meta.url), 'utf8');
+const appSource = await readFile(new URL('../public/js/app-20260720b.js', import.meta.url), 'utf8');
 assert.match(appSource, /data-act="retry-payment"/);
 assert.match(appSource, /api\/payments\/payapp\/retry/);
 
-const dataSource = await readFile(new URL('../public/js/data-20260720a.js', import.meta.url), 'utf8');
+const dataSource = await readFile(new URL('../public/js/data-20260720b.js', import.meta.url), 'utf8');
 assert.match(dataSource, /id:\s*'card'/);
-assert.doesNotMatch(dataSource, /id:\s*'(wechat|apple|kakao|naver|payco)'/);
+assert.match(dataSource, /id:\s*'apple'/);
+assert.match(dataSource, /id:\s*'wechat'/);
+assert.doesNotMatch(dataSource, /id:\s*'(kakao|naver|payco)'/);
+const browserContext = { window: {} };
+vm.runInNewContext(dataSource, browserContext);
+const methodIds = (locale, appleAvailable) => Array.from(browserContext.window.MTM_DATA.paymentMethods(locale, appleAvailable), (method) => method.id);
+assert.deepEqual(methodIds('ko', true), ['card']);
+assert.deepEqual(methodIds('en', true), ['apple', 'card']);
+assert.deepEqual(methodIds('en', false), ['card']);
+assert.deepEqual(methodIds('ja', true), ['apple', 'card']);
+assert.deepEqual(methodIds('zh', false), ['wechat', 'card']);
 
 const middlewareSource = await readFile(new URL('../functions/_middleware.js', import.meta.url), 'utf8');
 for (const locale of ['ko', 'en', 'ja', 'zh']) {

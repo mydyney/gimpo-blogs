@@ -1,4 +1,4 @@
-// mytokyomate — region/spot data & service constants (card-only checkout)
+// mytokyomate — region/spot data & service constants
 (function (global) {
   'use strict';
 
@@ -77,6 +77,8 @@
 
   const PAY_METHODS = [
     { id: 'card', payapp: 'card', ko: '신용·체크카드', en: 'CARD', ja: 'クレジットカード', zh: '信用卡', locales: ['ko', 'en', 'ja', 'zh'] },
+    { id: 'apple', payapp: 'applepay', ko: '애플페이', en: 'APPLE PAY', ja: 'Apple Pay', zh: 'Apple Pay', locales: ['en', 'ja'] },
+    { id: 'wechat', payapp: 'wechat', ko: '위챗페이', en: 'WECHAT PAY', ja: 'WeChat Pay', zh: '微信支付', locales: ['zh'] },
   ];
 
   const option = (value, ko, en, ja, zh) => ({ value, ko, en, ja, zh });
@@ -92,8 +94,10 @@
     return found ? (found[locale] || found.en || found.ko) : value;
   }
 
-  function paymentMethods() {
-    return PAY_METHODS.slice();
+  function paymentMethods(locale, appleAvailable) {
+    const order = locale === 'zh' ? ['wechat', 'card'] : ((locale === 'en' || locale === 'ja') ? ['apple', 'card'] : ['card']);
+    return order.map((id) => PAY_METHODS.find((item) => item.id === id))
+      .filter((item) => item && item.locales.includes(locale) && (item.id !== 'apple' || appleAvailable));
   }
 
   global.MTM_DATA = {
