@@ -2,6 +2,7 @@ import { json, sameOrigin, readJson } from '../../../_lib/http.js';
 import { requireUser, safeEqual } from '../../../_lib/auth.js';
 import { validSelections, validForm } from '../../../_lib/catalog.js';
 import { validLocale, statusLabel } from '../../../_lib/locale.js';
+import { payappCheckoutCopy } from '../../../_lib/payment-copy.js';
 
 const PAYAPP_API_URL = 'https://api.payapp.kr/oapi/apiLoad.html';
 const PRICE_WON = 5000;
@@ -58,15 +59,16 @@ function statusForPayState(payState) {
 
 async function requestPayappCheckout({ request, env, email, requestId, paymentId, form, locale, payMethod }) {
   const url = new URL(request.url);
+  const checkoutCopy = payappCheckoutCopy(locale);
   const postData = formBody({
     cmd: 'payrequest',
     userid: env.PAYAPP_USERID,
-    goodname: 'mytokyomate 여행 계획 요청',
+    goodname: checkoutCopy.goodname,
     price: PRICE_WON,
     recvphone: form.phone,
     vccode: form.countryCode,
     recvemail: email,
-    memo: 'mytokyomate 맞춤 여행 계획',
+    memo: checkoutCopy.memo,
     reqaddr: '0',
     feedbackurl: `${url.origin}/api/payments/payapp/feedback`,
     var1: requestId,
