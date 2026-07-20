@@ -15,7 +15,6 @@
   // config loads / when unset). Seeded from a localStorage cache for an instant
   // correct first paint, then refreshed from /api/regions (KV-backed).
   let visibleRegionIds = null;
-  let enabledPaymentMethods = null;
   try {
     const cached = JSON.parse(localStorage.getItem('mtm_visible_regions') || 'null');
     if (Array.isArray(cached)) visibleRegionIds = cached;
@@ -33,13 +32,12 @@
     region: 'tokyo',
     sel: [],                                   // [{regionId, spotId}]
     form: { count: 'count_2', group: 'couple', countryCode: I.locale === 'zh' ? '86' : (I.locale === 'ja' ? '81' : '82'), phone: '', date: '', duration: 'nights_3', budget: '1m_2m', lodging: '', notes: '' },
-    payMethod: I.locale === 'zh' ? 'wechat' : ((I.locale === 'en' || I.locale === 'ja') ? 'apple' : 'card'),
+    payMethod: 'card',
     emailInput: '', authName: '', authCode: '', authStep: 'email', authPurpose: '', authErr: '', authBusy: false, afterLogin: null,
     requestBusy: false, requestErr: '', retryBusyId: '', retryErrId: '', retryErr: '', adminBusy: false, adminErr: '',
     notifOpen: false, mobileMenuOpen: false,
     adminSel: null, adminTitle: '', adminBody: '', adminLocale: 'all',
     adminRegions: null, adminRegionsSaved: false,
-    adminPayments: null, adminPaymentsSaved: false,
   };
 
   const viewEl = document.getElementById('view');
@@ -463,8 +461,7 @@
       ['숙소 선호', f.lodging || '특별한 선호 없음'],
       ['요청사항', f.notes || '없음'],
     ];
-    const appleAvailable = Boolean(window.ApplePaySession && window.ApplePaySession.canMakePayments && window.ApplePaySession.canMakePayments());
-    const methods = D.paymentMethods(I.locale, enabledPaymentMethods, appleAvailable);
+    const methods = D.paymentMethods();
     if (!methods.some((m) => m.id === ui.payMethod)) ui.payMethod = methods.length ? methods[0].id : 'card';
     const methodObj = methods.find((m) => m.id === ui.payMethod) || methods[0] || D.PAY_METHODS.find((m) => m.id === 'card');
     const disabled = ui.requestBusy || phoneIncomplete();
@@ -723,17 +720,11 @@
   }
 
   function viewPaymentSettings() {
-    if (ui.adminPayments === null) ui.adminPayments = (enabledPaymentMethods || D.PAY_METHODS.map((item) => item.id)).slice();
-    const methods = D.PAY_METHODS.map((method) => {
-      const checked = ui.adminPayments.includes(method.id);
-      return '<label class="payment-toggle"><input type="checkbox" data-admin-payment="' + method.id + '"' + (checked ? ' checked' : '') + (method.id === 'card' ? ' disabled' : '') + '>' +
-        '<span><b>' + esc(method.en) + '</b><small>' + esc(method.ko) + (method.id === 'card' ? ' · 필수' : '') + '</small></span></label>';
-    }).join('');
+    const method = D.PAY_METHODS[0];
     return '<div class="admin-regions admin-payments"><div class="ar-title">PayApp 결제수단</div>' +
-      '<div class="ar-desc">PayApp 판매자 설정에서 활성화한 수단만 선택하세요. 카드는 해외 결제 대체 수단으로 항상 유지됩니다.</div>' +
-      '<div class="payment-toggle-grid">' + methods + '</div><div class="ad-actions">' +
-      '<button class="btn btn-pill" data-act="save-payments">결제수단 저장</button>' +
-      '<span class="form-hint">' + (ui.adminPaymentsSaved ? '저장되었습니다 ✓' : '') + '</span></div></div>';
+      '<div class="ar-desc">PG사 정책에 따라 신용·체크카드 결제만 사용합니다.</div>' +
+      '<div class="payment-toggle-grid"><label class="payment-toggle"><input type="checkbox" checked disabled>' +
+      '<span><b>' + esc(method.en) + '</b><small>' + esc(method.ko) + ' · 고정</small></span></label></div></div>';
   }
 
   function viewAdmin() {
@@ -1024,19 +1015,6 @@
       .catch(() => { /* offline / not deployed — keep cached/default */ });
   }
 
-  function fetchPaymentConfig() {
-    return fetch('/api/payment-methods', { headers: { Accept: 'application/json' } })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (data && Array.isArray(data.enabled)) {
-          enabledPaymentMethods = data.enabled;
-          ui.adminPayments = null;
-          if (currentRoute().name === 'pay' || IS_ADMIN_HOST) render();
-        }
-      })
-      .catch(() => { /* use the locale defaults */ });
-  }
-
   function saveRegions() {
     if (!ui.adminRegions || ui.adminRegions.length === 0) return;
     const btn = document.getElementById('save-regions');
@@ -1058,20 +1036,6 @@
         if (btn) btn.disabled = false;
         if (hint) hint.textContent = '저장에 실패했습니다. 다시 시도해 주세요.';
       });
-  }
-
-  function savePayments() {
-    if (!ui.adminPayments || !ui.adminPayments.includes('card')) return;
-    fetch('/api/payment-methods', {
-      method: 'PUT', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ enabled: ui.adminPayments }),
-    }).then((r) => (r.ok ? r.json() : Promise.reject(new Error('save_failed'))))
-      .then((data) => {
-        enabledPaymentMethods = data.enabled;
-        ui.adminPaymentsSaved = true;
-        render();
-      })
-      .catch(() => { ui.adminErr = '결제수단 저장에 실패했습니다.'; render(); });
   }
 
   document.addEventListener('click', (e) => {
@@ -1175,7 +1139,6 @@
         break;
       case 'register-guide': registerGuide(); break;
       case 'save-regions': saveRegions(); break;
-      case 'save-payments': savePayments(); break;
       case 'region-add': {
         const id = el.getAttribute('data-region');
         if (D.REGIONS.some((r) => r.id === id) && ui.adminRegions.indexOf(id) < 0) ui.adminRegions = ui.adminRegions.concat([id]);
@@ -1250,12 +1213,6 @@
       ui.adminSel = null;
       loadAdminRequests();
     }
-    if (t.matches('[data-admin-payment]')) {
-      const method = t.getAttribute('data-admin-payment');
-      if (t.checked && !ui.adminPayments.includes(method)) ui.adminPayments = ui.adminPayments.concat([method]);
-      if (!t.checked && method !== 'card') ui.adminPayments = ui.adminPayments.filter((item) => item !== method);
-      ui.adminPaymentsSaved = false;
-    }
   });
 
   // ===== Boot =====
@@ -1264,5 +1221,4 @@
   if (IS_ADMIN_HOST) loadAdminRequests();
   else refreshSession();
   fetchRegionConfig();
-  fetchPaymentConfig();
 })();

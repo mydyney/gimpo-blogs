@@ -76,12 +76,7 @@
   ];
 
   const PAY_METHODS = [
-    { id: 'wechat', payapp: 'wechat', ko: '위챗페이', en: 'WECHAT PAY', ja: 'WeChat Pay', zh: '微信支付', locales: ['zh'] },
-    { id: 'apple', payapp: 'applepay', ko: '애플페이', en: 'APPLE PAY', ja: 'Apple Pay', zh: 'Apple Pay', locales: ['ko', 'en', 'ja'] },
     { id: 'card', payapp: 'card', ko: '신용·체크카드', en: 'CARD', ja: 'クレジットカード', zh: '信用卡', locales: ['ko', 'en', 'ja', 'zh'] },
-    { id: 'kakao', payapp: 'kakaopay', ko: '카카오페이', en: 'KAKAO PAY', ja: 'Kakao Pay', zh: 'Kakao Pay', locales: ['ko'] },
-    { id: 'naver', payapp: 'naverpay', ko: '네이버페이', en: 'NAVER PAY', ja: 'Naver Pay', zh: 'Naver Pay', locales: ['ko'] },
-    { id: 'payco', payapp: 'payco', ko: '페이코', en: 'PAYCO', ja: 'PAYCO', zh: 'PAYCO', locales: ['ko'] },
   ];
 
   const option = (value, ko, en, ja, zh) => ({ value, ko, en, ja, zh });
@@ -97,11 +92,8 @@
     return found ? (found[locale] || found.en || found.ko) : value;
   }
 
-  function paymentMethods(locale, enabled, appleAvailable) {
-    const allowed = Array.isArray(enabled) ? enabled : PAY_METHODS.map((item) => item.id);
-    const order = locale === 'zh' ? ['wechat', 'card'] : locale === 'ko' ? ['card', 'kakao', 'naver', 'payco', 'apple'] : ['apple', 'card'];
-    return order.map((id) => PAY_METHODS.find((item) => item.id === id))
-      .filter((item) => item && item.locales.includes(locale) && allowed.includes(item.id) && (item.id !== 'apple' || appleAvailable));
+  function paymentMethods() {
+    return PAY_METHODS.slice();
   }
 
   global.MTM_DATA = {

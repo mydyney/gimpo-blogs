@@ -82,9 +82,8 @@
     // 5. payment form UI (D1 submission is covered by API integration tests)
     check('summary has spots', document.querySelector('.ps-row span:last-child').textContent.indexOf('시부야') >= 0);
     check('pay enabled with phone', document.getElementById('pay-btn').disabled === false);
-    click('[data-act="pick-method"][data-method="kakao"]');
+    check('card is the only payment method', document.querySelectorAll('.pm-card').length === 1 && !!document.querySelector('[data-method="card"]'));
     check('payapp note shown', document.querySelector('.easy-note').textContent.indexOf('페이앱') >= 0);
-    click('[data-act="pick-method"][data-method="card"]');
     check('card data not collected locally', !document.querySelector('[data-card="num"]'));
     check('D1 submit action present', document.getElementById('pay-btn').getAttribute('data-act') === 'do-pay');
     check('no local prototype store', !localStorage.getItem('mtm_proto_v1'));

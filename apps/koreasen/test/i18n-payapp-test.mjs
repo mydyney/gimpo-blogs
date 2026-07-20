@@ -18,8 +18,9 @@ assert.equal(validLocale('fr'), 'ko');
 assert.equal(statusLabel('guide_arrived', 'ja'), 'ガイド完成');
 
 const paymentSource = await readFile(new URL('../functions/api/payments/payapp/[[path]].js', import.meta.url), 'utf8');
-assert.match(paymentSource, /wechat:\s*'wechat'/);
-assert.match(paymentSource, /apple:\s*'applepay'/);
+assert.match(paymentSource, /PAYMENT_METHOD\s*=\s*'card'/);
+assert.doesNotMatch(paymentSource, /kakaopay|naverpay|applepay|wechat/);
+assert.match(paymentSource, /openpaytype:\s*PAYMENT_METHOD/);
 assert.match(paymentSource, /vccode:\s*form\.countryCode/);
 assert.match(paymentSource, /pay_type/);
 assert.match(paymentSource, /method_mismatch/);
@@ -35,6 +36,10 @@ assert.doesNotMatch(retryMigration, /CREATE UNIQUE INDEX[\s\S]*idx_payments_requ
 const appSource = await readFile(new URL('../public/js/app.js', import.meta.url), 'utf8');
 assert.match(appSource, /data-act="retry-payment"/);
 assert.match(appSource, /api\/payments\/payapp\/retry/);
+
+const dataSource = await readFile(new URL('../public/js/data.js', import.meta.url), 'utf8');
+assert.match(dataSource, /id:\s*'card'/);
+assert.doesNotMatch(dataSource, /id:\s*'(wechat|apple|kakao|naver|payco)'/);
 
 const middlewareSource = await readFile(new URL('../functions/_middleware.js', import.meta.url), 'utf8');
 for (const locale of ['ko', 'en', 'ja', 'zh']) {

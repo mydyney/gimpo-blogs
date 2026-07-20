@@ -6,15 +6,7 @@ import { validLocale, statusLabel } from '../../../_lib/locale.js';
 const PAYAPP_API_URL = 'https://api.payapp.kr/oapi/apiLoad.html';
 const PRICE_WON = 5000;
 const RETRYABLE_REQUEST_STATES = ['payment_pending', 'payment_failed', 'payment_canceled'];
-
-const PAY_TYPES = {
-  wechat: 'wechat',
-  apple: 'applepay',
-  card: 'card',
-  kakao: 'kakaopay',
-  naver: 'naverpay',
-  payco: 'payco',
-};
+const PAYMENT_METHOD = 'card';
 
 function subpath(url) {
   return new URL(url).pathname.replace(/^\/api\/payments\/payapp\/?/, '').split('/').filter(Boolean);
@@ -46,19 +38,6 @@ function envReady(env) {
   return Boolean(env.PAYAPP_USERID && env.PAYAPP_LINKKEY && env.PAYAPP_LINKVAL);
 }
 
-async function allowedPayMethod(env, requested, locale) {
-  const byLocale = { ko: ['card', 'kakao', 'naver', 'payco', 'apple'], en: ['apple', 'card'], ja: ['apple', 'card'], zh: ['wechat', 'card'] };
-  let enabled = Object.keys(PAY_TYPES);
-  try {
-    if (env.SITE_CONFIG) {
-      const stored = await env.SITE_CONFIG.get('enabled_payment_methods', 'json');
-      if (Array.isArray(stored)) enabled = stored;
-    }
-  } catch (error) { /* use defaults */ }
-  const allowed = byLocale[locale] || byLocale.ko;
-  return allowed.includes(requested) && enabled.includes(requested) ? requested : 'card';
-}
-
 function statusForPayState(payState) {
   if (payState === '4') return { payment: 'paid', code: 'guide_writing' };
   if (payState === '10') return { payment: 'waiting', code: 'payment_waiting' };
@@ -66,7 +45,7 @@ function statusForPayState(payState) {
   return { payment: 'pending', code: 'payment_pending' };
 }
 
-async function requestPayappCheckout({ request, env, email, requestId, paymentId, form, locale, payMethod }) {
+async function requestPayappCheckout({ request, env, email, requestId, paymentId, form, locale }) {
   const url = new URL(request.url);
   const postData = formBody({
     cmd: 'payrequest',
@@ -83,7 +62,7 @@ async function requestPayappCheckout({ request, env, email, requestId, paymentId
     var2: paymentId,
     smsuse: 'n',
     returnurl: `${url.origin}/${locale}/plan/done`,
-    openpaytype: PAY_TYPES[payMethod],
+    openpaytype: PAYMENT_METHOD,
     checkretry: 'y',
   });
 
@@ -132,7 +111,7 @@ async function createPayment(context) {
   if (!selections || !form) return json({ ok: false, error: 'invalid_request' }, { status: 400 });
 
   const locale = validLocale(data.locale);
-  const payMethod = await allowedPayMethod(env, PAY_TYPES[data.payMethod] ? data.payMethod : 'card', locale);
+  const payMethod = PAYMENT_METHOD;
   const now = Date.now();
   const requestId = 'R-' + crypto.randomUUID();
   const paymentId = 'P-' + crypto.randomUUID();
@@ -146,7 +125,7 @@ async function createPayment(context) {
     ).bind(paymentId, requestId, auth.user.id, 'payapp', PRICE_WON, 'pending', payMethod, form.countryCode, locale, 'KRW', now, now),
   ]);
 
-  const result = await requestPayappCheckout({ request, env, email: auth.user.email, requestId, paymentId, form, locale, payMethod });
+  const result = await requestPayappCheckout({ request, env, email: auth.user.email, requestId, paymentId, form, locale });
 
   if (result.state !== '1' || !result.payurl || !result.mul_no) {
     await markCheckoutFailed(env, requestId, paymentId, result);
@@ -194,14 +173,13 @@ async function retryPayment(context) {
   if (!form) return json({ ok: false, error: 'invalid_request' }, { status: 400 });
 
   const locale = validLocale(row.locale || data.locale);
-  const requestedMethod = PAY_TYPES[data.payMethod] ? data.payMethod : 'card';
-  const payMethod = await allowedPayMethod(env, requestedMethod, locale);
+  const payMethod = PAYMENT_METHOD;
   const now = Date.now();
 
   const recent = await env.DB.prepare(`SELECT pay_url FROM payments
     WHERE request_id = ? AND provider = 'payapp' AND status = 'pending'
-      AND pay_url IS NOT NULL AND created_at > ?
-    ORDER BY created_at DESC LIMIT 1`).bind(requestId, now - 30000).first();
+      AND method_requested = ? AND pay_url IS NOT NULL AND created_at > ?
+    ORDER BY created_at DESC LIMIT 1`).bind(requestId, PAYMENT_METHOD, now - 30000).first();
   if (recent && recent.pay_url) {
     return json({ ok: true, payurl: recent.pay_url, reused: true });
   }
@@ -220,7 +198,7 @@ async function retryPayment(context) {
       )`).bind(statusLabel('payment_pending', 'ko'), 'payment_pending', now, requestId, requestId),
   ]);
 
-  const result = await requestPayappCheckout({ request, env, email: row.email, requestId, paymentId, form, locale, payMethod });
+  const result = await requestPayappCheckout({ request, env, email: row.email, requestId, paymentId, form, locale });
   if (result.state !== '1' || !result.payurl || !result.mul_no) {
     await markCheckoutFailed(env, requestId, paymentId, result);
     return json({ ok: false, error: result.errorMessage || 'payapp_request_failed' }, { status: 502 });
@@ -259,7 +237,7 @@ async function handleFeedback(context) {
   if (!authOk) return new Response('FAIL', { status: 403 });
 
   const mapped = statusForPayState(String(data.pay_state || ''));
-  const expectedPayTypes = { card: '1', kakao: '15', naver: '16', payco: '20', wechat: '22', apple: '23' };
+  const expectedPayTypes = { card: '1' };
   const payType = String(data.pay_type || '');
   const mismatch = Boolean(payType && expectedPayTypes[row.method_requested] && payType !== expectedPayTypes[row.method_requested]);
   const requestUpdate = mapped.payment === 'paid'
