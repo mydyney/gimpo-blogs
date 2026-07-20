@@ -33,11 +33,11 @@ assert.match(retryMigration, /DROP INDEX IF EXISTS idx_payments_request_provider
 assert.match(retryMigration, /CREATE INDEX IF NOT EXISTS idx_payments_request_provider/);
 assert.doesNotMatch(retryMigration, /CREATE UNIQUE INDEX[\s\S]*idx_payments_request_provider/);
 
-const appSource = await readFile(new URL('../public/js/app.js', import.meta.url), 'utf8');
+const appSource = await readFile(new URL('../public/js/app-20260720a.js', import.meta.url), 'utf8');
 assert.match(appSource, /data-act="retry-payment"/);
 assert.match(appSource, /api\/payments\/payapp\/retry/);
 
-const dataSource = await readFile(new URL('../public/js/data.js', import.meta.url), 'utf8');
+const dataSource = await readFile(new URL('../public/js/data-20260720a.js', import.meta.url), 'utf8');
 assert.match(dataSource, /id:\s*'card'/);
 assert.doesNotMatch(dataSource, /id:\s*'(wechat|apple|kakao|naver|payco)'/);
 
